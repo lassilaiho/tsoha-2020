@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<form method="POST" action="{{ form_action }}">
+    <label>
+        Name<br />
+        <input type="text" name="name" value="{{ recipe.name }}" />
+    </label>
+    <br /><br />
+    <label>
+        Description<br />
+        <textarea name="description" rows="5" cols="50">
+            {{- recipe.description -}}
+        </textarea>
+    </label>
+    <br /><br />
+    <label>
+        Steps<br />
+        <textarea name="steps" rows="5" cols="50">
+            {{- recipe.steps -}}
+        </textarea>
+    </label>
+    <br /><br />
+    <a href="{{ url_for('get_recipes') }}">Cancel</a>
+    <button type="submit">Save</button>
+</form>
+{% endblock %}

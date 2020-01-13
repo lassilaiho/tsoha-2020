@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<h1>Recipes</h1>
+<a href="{{ url_for('create_recipe_form') }}">
+    Add recipe
+</a>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th></th>
+        <th></th>
+    </tr>
+    {% for recipe in recipes %}
+    <tr>
+        <td>{{ recipe.name }}</td>
+        <td>{{ recipe.description }}</td>
+        <td>
+            <a href="{{ url_for('get_recipe', recipe_id=recipe.id) }}">
+                Details
+            </a>
+        </td>
+        <td>
+            <button form="delete-recipe-form" type="submit"
+                formaction="{{ url_for('delete_recipe', recipe_id=recipe.id) }}">
+                Delete
+            </button>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<form id="delete-recipe-form" method="POST"></form>
+{% endblock %}
