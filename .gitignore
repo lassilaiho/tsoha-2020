@@ -133,3 +133,6 @@ dmypy.json
 
 # Development configuration file
 /config.yaml
+
+# Databases
+*.db
