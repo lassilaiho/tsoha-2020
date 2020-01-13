@@ -5,6 +5,18 @@
         <title>Recipe Book</title>
     </head>
     <body>
+        <ul>
+            <li>
+                <a href="{{ url_for('index') }}">
+                    Index
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('get_recipes') }}">
+                    Recipes
+                </a>
+            </li>
+        </ul>
         {% block body %}{% endblock %}
     </body>
 </html>
