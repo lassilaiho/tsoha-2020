@@ -5,7 +5,7 @@ class Account(db.Model):
     __tablename__ = "accounts"
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, nullable=False)
+    username = db.Column(db.String, nullable=False, unique=True)
     password_hash = db.Column(db.String, nullable=False)
     role = db.Column(db.String, nullable=False)
 

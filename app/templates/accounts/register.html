@@ -25,6 +25,9 @@
                     {% for error in form.errors %}
                     <li>{{ error }}</li>
                     {% endfor %}
+                    {% if error %}
+                    <li>{{ error }}</li>
+                    {% endif %}
                 </ul>
             </td>
         </tr>

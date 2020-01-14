@@ -45,6 +45,12 @@ def register():
     form = LoginForm(request.form)
     if not form.validate():
         return render_template("accounts/register.html", form=form)
+    if Account.query.filter_by(username=form.username.data).count() > 0:
+        return render_template(
+            "accounts/register.html",
+            form=form,
+            error="Username is already taken.",
+        )
     password_hash = bcrypt.generate_password_hash(form.password.data)
     account = Account(form.username.data, password_hash, "user")
     db.session().add(account)
