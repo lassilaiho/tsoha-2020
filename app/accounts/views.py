@@ -36,3 +36,18 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for("index"))
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "GET":
+        return render_template("accounts/register.html", form=LoginForm())
+    form = LoginForm(request.form)
+    if not form.validate():
+        return render_template("accounts/register.html", form=form)
+    password_hash = bcrypt.generate_password_hash(form.password.data)
+    account = Account(form.username.data, password_hash, "user")
+    db.session().add(account)
+    db.session.commit()
+    login_user(account)
+    return redirect(url_for("index"))
