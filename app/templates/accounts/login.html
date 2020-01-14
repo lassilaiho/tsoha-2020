@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<form method="POST" action="{{ url_for('login') }}">
+    <table>
+        <tr>
+            <td>
+                {{ form.username.label }}
+            </td>
+            <td>
+                {{ form.username }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                {{ form.password.label }}
+            </td>
+            <td>
+                {{ form.password }}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <ul>
+                    {% for error in form.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                    {% if error %}
+                    <li>{{ error }}</li>
+                    {% endif %}
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button type="submit">Login</button>
+            </td>
+        </tr>
+    </table>
+</form>
+{% endblock %}

@@ -1,4 +1,5 @@
 from flask import render_template, url_for, redirect, request, abort
+from flask_login import login_required
 
 from app.main import app, db
 from app.recipes.models import Recipe
@@ -14,6 +15,7 @@ def render_edit_form(action, form):
 
 
 @app.route("/recipes")
+@login_required
 def get_recipes():
     return render_template(
         "recipes/index.html",
@@ -22,11 +24,13 @@ def get_recipes():
 
 
 @app.route("/recipes/new")
+@login_required
 def create_recipe_form():
     return render_edit_form(url_for("create_recipe"), EditRecipeForm())
 
 
 @app.route("/recipes/new", methods=["POST"])
+@login_required
 def create_recipe():
     form = EditRecipeForm(request.form)
     if not form.validate():
@@ -42,6 +46,7 @@ def create_recipe():
 
 
 @app.route("/recipes/<int:recipe_id>")
+@login_required
 def get_recipe(recipe_id: int):
     recipe = Recipe.query.get(recipe_id)
     if recipe is None:
@@ -57,6 +62,7 @@ def get_recipe(recipe_id: int):
 
 
 @app.route("/recipes/<int:recipe_id>", methods=["POST"])
+@login_required
 def update_recipe(recipe_id: int):
     form = EditRecipeForm(request.form)
     if not form.validate():
@@ -75,6 +81,7 @@ def update_recipe(recipe_id: int):
 
 
 @app.route("/recipes/<int:recipe_id>/delete", methods=["POST"])
+@login_required
 def delete_recipe(recipe_id: int):
     recipe = Recipe.query.get(recipe_id)
     if recipe is None:

@@ -5,6 +5,14 @@
         <title>Recipe Book</title>
     </head>
     <body>
+        {% if current_user.is_authenticated %}
+        <p>
+            Logged in as {{ current_user.username }}.
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </p>
+        {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        {% endif %}
         <ul>
             <li>
                 <a href="{{ url_for('index') }}">
