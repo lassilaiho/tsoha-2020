@@ -12,6 +12,7 @@ flask = "*"
 ruamel-yaml = "*"
 gunicorn = "*"
 flask-sqlalchemy = "*"
+flask-wtf = "*"
 
 [requires]
 python_version = "3.8"

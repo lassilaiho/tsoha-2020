@@ -3,22 +3,18 @@
 {% block body %}
 <form method="POST" action="{{ form_action }}">
     <label>
-        Name<br />
-        <input type="text" name="name" value="{{ recipe.name }}" />
+        {{ form.name.label }}<br />
+        {{ form.name }}
     </label>
     <br /><br />
     <label>
-        Description<br />
-        <textarea name="description" rows="5" cols="50">
-            {{- recipe.description -}}
-        </textarea>
+        {{ form.description.label }}<br />
+        {{ form.description(rows='5', cols='50') }}
     </label>
     <br /><br />
     <label>
-        Steps<br />
-        <textarea name="steps" rows="5" cols="50">
-            {{- recipe.steps -}}
-        </textarea>
+        {{ form.steps.label }}<br />
+        {{ form.steps(rows='5', cols='50') }}
     </label>
     <br /><br />
     <a href="{{ url_for('get_recipes') }}">Cancel</a>
