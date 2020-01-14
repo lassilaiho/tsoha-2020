@@ -1,5 +1,5 @@
 from flask import render_template, url_for, redirect, request, abort
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from app.main import app, db
 from app.recipes.models import Recipe
@@ -19,7 +19,7 @@ def render_edit_form(action, form):
 def get_recipes():
     return render_template(
         "recipes/index.html",
-        recipes=Recipe.query.all(),
+        recipes=Recipe.query.filter_by(account_id=current_user.id),
     )
 
 
@@ -40,6 +40,7 @@ def create_recipe():
         description=form.description.data,
         steps=form.steps.data,
     )
+    recipe.account_id = current_user.id
     db.session().add(recipe)
     db.session().commit()
     return redirect(url_for("get_recipes"))
@@ -48,7 +49,10 @@ def create_recipe():
 @app.route("/recipes/<int:recipe_id>")
 @login_required
 def get_recipe(recipe_id: int):
-    recipe = Recipe.query.get(recipe_id)
+    recipe = Recipe.query.filter_by(
+        id=recipe_id,
+        account_id=current_user.id,
+    ).first()
     if recipe is None:
         abort(404)
     form = EditRecipeForm()
@@ -70,7 +74,10 @@ def update_recipe(recipe_id: int):
             url_for("update_recipe", recipe_id=recipe_id),
             form,
         )
-    recipe = Recipe.query.get(recipe_id)
+    recipe = Recipe.query.filter_by(
+        id=recipe_id,
+        account_id=current_user.id,
+    ).first()
     if recipe is None:
         abort(404)
     recipe.name = form.name.data
@@ -83,7 +90,10 @@ def update_recipe(recipe_id: int):
 @app.route("/recipes/<int:recipe_id>/delete", methods=["POST"])
 @login_required
 def delete_recipe(recipe_id: int):
-    recipe = Recipe.query.get(recipe_id)
+    recipe = Recipe.query.filter_by(
+        id=recipe_id,
+        account_id=current_user.id,
+    ).first()
     if recipe is None:
         abort(404)
     db.session().delete(recipe)

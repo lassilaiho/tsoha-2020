@@ -9,6 +9,8 @@ class Account(db.Model):
     password_hash = db.Column(db.String, nullable=False)
     role = db.Column(db.String, nullable=False)
 
+    recipes = db.relationship("Recipe", backref="accounts", lazy=True)
+
     def __init__(self, username, password_hash, role):
         self.username = username
         self.password_hash = password_hash
