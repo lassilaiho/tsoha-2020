@@ -6,14 +6,6 @@ from app.accounts.models import Account
 from app.accounts.forms import LoginForm
 
 
-def render_login_error():
-    return render_template(
-        "accounts/login.html",
-        form=form,
-        error="Invalid username or password",
-    )
-
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
@@ -27,7 +19,11 @@ def login():
                 account.password_hash,
                 form.password.data,
             ):
-        return render_login_error()
+        return render_template(
+            "accounts/login.html",
+            form=form,
+            error="Invalid username or password",
+        )
     login_user(account)
     return redirect(url_for("index"))
 
