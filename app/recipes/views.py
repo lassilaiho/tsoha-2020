@@ -103,6 +103,7 @@ def update_recipe(recipe_id: int):
         abort(404)
     for x in RecipeIngredient.query.filter_by(recipe_id=recipe.id):
         db.session().delete(x)
+    db.session.flush()
     recipe.name = form.name.data
     recipe.description = form.description.data
     recipe.steps = form.steps.data
@@ -116,6 +117,8 @@ def update_recipe(recipe_id: int):
         db.session().flush()
         recipe_ingredient.ingredient_id = ingredient.id
         db.session().add(recipe_ingredient)
+    db.session().flush()
+    Ingredient.delete_unused_ingredients(current_user.id)
     db.session().commit()
     return redirect(url_for("get_recipes"))
 
@@ -130,5 +133,7 @@ def delete_recipe(recipe_id: int):
     if recipe is None:
         abort(404)
     db.session().delete(recipe)
+    db.session().flush()
+    Ingredient.delete_unused_ingredients(current_user.id)
     db.session().commit()
     return redirect(url_for("get_recipes"))

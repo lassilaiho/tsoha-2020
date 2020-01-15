@@ -1,3 +1,5 @@
+from sqlalchemy.sql import text
+
 from app.main import db
 
 
@@ -15,6 +17,21 @@ class Ingredient(db.Model):
 
     def __init__(self, name):
         self.name = name
+
+    @staticmethod
+    def delete_unused_ingredients(account_id):
+        stmt = text("""
+DELETE FROM ingredients
+WHERE ingredients.id IN (
+    SELECT ingredients.id
+    FROM ingredients
+    LEFT JOIN recipe_ingredient
+    ON recipe_ingredient.ingredient_id = ingredients.id
+    WHERE ingredients.account_id = :account_id
+    GROUP BY ingredients.id
+    HAVING COUNT(recipe_ingredient.id) = 0
+)""").params(account_id=account_id)
+        db.session().execute(stmt)
 
 
 class RecipeIngredient(db.Model):
