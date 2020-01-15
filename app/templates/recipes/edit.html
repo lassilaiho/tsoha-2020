@@ -2,22 +2,25 @@
 
 {% block body %}
 <form method="POST" action="{{ form_action }}">
-    <label>
-        {{ form.name.label }}<br />
-        {{ form.name }}
-    </label>
-    <br /><br />
-    <label>
-        {{ form.description.label }}<br />
-        {{ form.description(rows='5', cols='50') }}
-    </label>
-    <br /><br />
-    <label>
-        {{ form.steps.label }}<br />
-        {{ form.steps(rows='5', cols='50') }}
-    </label>
-    <br /><br />
-    <a href="{{ url_for('get_recipes') }}">Cancel</a>
-    <button type="submit">Save</button>
+    <div class="form-group">
+        <label for="name">{{ form.name.label }}</label>
+        {{ form.name(id='name', class='form-control') }}
+    </div>
+    <div class="form-group">
+        <label for="description">{{ form.description.label }}</label>
+        {{ form.description(id='description', rows='5', class='form-control') }}
+    </div>
+    <div class="form-group">
+        <label for="steps">{{ form.steps.label }}</label>
+        {{ form.steps(id='steps', rows='5', class='form-control') }}
+    </div>
+    <div class="form-group d-flex justify-content-end">
+        <a class="btn btn-secondary" href="{{ url_for('get_recipes') }}">
+            Cancel
+        </a>
+        <button class="btn btn-primary ml-2" type="submit">
+            Save
+        </button>
+    </div>
 </form>
 {% endblock %}
