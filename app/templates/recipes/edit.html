@@ -14,6 +14,16 @@
         <label for="steps">{{ form.steps.label }}</label>
         {{ form.steps(id='steps', rows='5', class='form-control') }}
     </div>
+    <div class="form-group">
+        <div class="d-flex mb-2">
+            <label class="mr-auto">Ingredients</label>
+            <button type="button" class="btn btn-success"
+                onclick="addIngredient()">
+                Add ingredient
+            </button>
+        </div>
+        <div id="ingredient-list"></div>
+    </div>
     <div class="form-group d-flex justify-content-end">
         <a class="btn btn-secondary" href="{{ url_for('get_recipes') }}">
             Cancel
@@ -23,4 +33,81 @@
         </button>
     </div>
 </form>
+<template id="ingredient-row-template">
+    <div class="form-inline mb-2">
+        <input class="form-control amount-input" type="text" value=""
+            placeholder="Amount">
+        <input class="form-control flex-grow-1 ml-2 name-input" required=""
+            type="text" value="" placeholder="Ingredient">
+        <button type="button" class="btn btn-danger ml-2"
+            onclick="removeIngredient(event)">
+            Remove
+        </button>
+    </div>
+</template>
+<script>
+    let ingredientList;
+    let ingredientRowTemplate;
+
+    const ingredients = JSON.parse(`{
+        "count": {{ form.ingredient_amounts.__len__()|tojson }},
+        "initialValues": [
+            {% for recipe_ingredient in form.ingredient_amounts %}
+            {
+                "amount": {{ recipe_ingredient.form.amount.data|tojson }},
+                "name": {{ recipe_ingredient.form.name.data|tojson }}
+            }
+            {% if not loop.last%},{% endif %}
+            {% endfor %}
+        ]
+    }`);
+
+    document.addEventListener("DOMContentLoaded", () => {
+        ingredientList = document.getElementById("ingredient-list");
+        ingredientRowTemplate = document.getElementById("ingredient-row-template");
+
+        for (let i = 0; i < ingredients.initialValues.length; i++) {
+            const { amount, name } = ingredients.initialValues[i];
+            ingredientList.append(createIngredientRow(i, amount, name));
+        }
+    });
+
+
+    function addIngredient() {
+        ingredientList.append(createIngredientRow(ingredients.count++, "", ""));
+    }
+
+    function removeIngredient(event) {
+        const row = event.target.parentNode;
+        const index = parseInt(row.dataset.index);
+        let next = row.nextElementSibling;
+        while (next) {
+            const newIndex = parseInt(next.dataset.index) - 1;
+            next.dataset.index = newIndex;
+            const amountInput = next.querySelector(".amount-input");
+            amountInput.id = `ingredient_amounts-${newIndex}-amount`;
+            amountInput.name = amountInput.id;
+            const nameInput = next.querySelector(".name-input");
+            nameInput.id = `ingredient_amounts-${newIndex}-name`;
+            nameInput.name = nameInput.id;
+            next = next.nextElementSibling;
+        }
+        row.remove();
+        ingredients.count--;
+    }
+
+    function createIngredientRow(index, amount, name) {
+        const row = ingredientRowTemplate.content.cloneNode(true);
+        row.firstElementChild.dataset.index = index;
+        const amountInput = row.querySelector(".amount-input");
+        amountInput.id = `ingredient_amounts-${index}-amount`;
+        amountInput.name = amountInput.id;
+        amountInput.value = amount;
+        const nameInput = row.querySelector(".name-input");
+        nameInput.id = `ingredient_amounts-${index}-name`;
+        nameInput.name = nameInput.id;
+        nameInput.value = name;
+        return row;
+    }
+</script>
 {% endblock %}

@@ -11,6 +11,10 @@ class Recipe(db.Model):
     account_id = db.Column(db.Integer, db.ForeignKey(
         "accounts.id"), nullable=False)
 
+    ingredient_amounts = db.relationship(
+        "RecipeIngredient", backref="recipe", lazy=True,
+        cascade="all, delete, delete-orphan")
+
     def __init__(self, name, description, steps):
         self.name = name
         self.description = description

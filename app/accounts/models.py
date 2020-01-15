@@ -10,6 +10,7 @@ class Account(db.Model):
     role = db.Column(db.String, nullable=False)
 
     recipes = db.relationship("Recipe", backref="accounts", lazy=True)
+    ingredients = db.relationship("Ingredient", backref="accounts", lazy=True)
 
     def __init__(self, username, password_hash, role):
         self.username = username
