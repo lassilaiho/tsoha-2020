@@ -21,15 +21,12 @@ class RecipeIngredientForm(FlaskForm):
         else:
             return f"{value} {unit}"
 
-    def parse_data_to(self, ingredient, recipe_ingredient):
-        ingredient.name = self.name.data
+    def parse_amount(self):
         match = amount_pattern.search(self.amount.data)
         if match:
-            recipe_ingredient.amount = Decimal(match.group("value"))
-            recipe_ingredient.amount_unit = match.group("unit").strip()
+            return Decimal(match.group("value")), match.group("unit").strip()
         else:
-            recipe_ingredient.amount = Decimal(1)
-            recipe_ingredient.amount_unit = self.amount.data.strip()
+            return Decimal(1), self.amount.data.strip()
 
     class Meta:
         csrf = False

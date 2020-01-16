@@ -33,6 +33,17 @@ WHERE ingredients.id IN (
 )""").params(account_id=account_id)
         db.session().execute(stmt)
 
+    @staticmethod
+    def insert_if_missing(name, account_id):
+        x = Ingredient.query.filter(Ingredient.name.ilike(name)).first()
+        if x:
+            return x
+        x = Ingredient(name)
+        x.account_id = account_id
+        db.session().add(x)
+        db.session().flush()
+        return x
+
 
 class RecipeIngredient(db.Model):
     __tablename__ = "recipe_ingredient"
@@ -44,3 +55,15 @@ class RecipeIngredient(db.Model):
         "ingredients.id"), nullable=False)
     recipe_id = db.Column(db.Integer, db.ForeignKey(
         "recipes.id"), nullable=False)
+
+    @staticmethod
+    def insert(amount, amount_unit, ingredient_id, recipe_id):
+        x = RecipeIngredient(
+            amount=amount,
+            amount_unit=amount_unit,
+            ingredient_id=ingredient_id,
+            recipe_id=recipe_id,
+        )
+        db.session().add(x)
+        db.session().flush()
+        return x

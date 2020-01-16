@@ -46,15 +46,10 @@ def create_recipe():
     db.session().add(recipe)
     db.session().flush()
     for recipe_ingredient_form in form.ingredient_amounts:
-        ingredient = Ingredient("")
-        ingredient.account_id = current_user.id
-        recipe_ingredient = RecipeIngredient()
-        recipe_ingredient.recipe_id = recipe.id
-        recipe_ingredient_form.parse_data_to(ingredient, recipe_ingredient)
-        db.session().add(ingredient)
-        db.session().flush()
-        recipe_ingredient.ingredient_id = ingredient.id
-        db.session().add(recipe_ingredient)
+        ingredient = Ingredient.insert_if_missing(
+            recipe_ingredient_form.data["name"].strip(), current_user.id)
+        amount, unit = recipe_ingredient_form.parse_amount()
+        RecipeIngredient.insert(amount, unit, ingredient.id, recipe.id)
     db.session().commit()
     return redirect(url_for("get_recipes"))
 
@@ -108,16 +103,10 @@ def update_recipe(recipe_id: int):
     recipe.description = form.description.data
     recipe.steps = form.steps.data
     for recipe_ingredient_form in form.ingredient_amounts:
-        ingredient = Ingredient("")
-        ingredient.account_id = current_user.id
-        recipe_ingredient = RecipeIngredient()
-        recipe_ingredient.recipe_id = recipe.id
-        recipe_ingredient_form.parse_data_to(ingredient, recipe_ingredient)
-        db.session().add(ingredient)
-        db.session().flush()
-        recipe_ingredient.ingredient_id = ingredient.id
-        db.session().add(recipe_ingredient)
-    db.session().flush()
+        ingredient = Ingredient.insert_if_missing(
+            recipe_ingredient_form.data["name"].strip(), current_user.id)
+        amount, unit = recipe_ingredient_form.parse_amount()
+        RecipeIngredient.insert(amount, unit, ingredient.id, recipe.id)
     Ingredient.delete_unused_ingredients(current_user.id)
     db.session().commit()
     return redirect(url_for("get_recipes"))
