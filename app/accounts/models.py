@@ -9,8 +9,12 @@ class Account(db.Model):
     password_hash = db.Column(db.String, nullable=False)
     role = db.Column(db.String, nullable=False)
 
-    recipes = db.relationship("Recipe", backref="accounts", lazy=True)
-    ingredients = db.relationship("Ingredient", backref="accounts", lazy=True)
+    recipes = db.relationship(
+        "Recipe", backref="account", lazy=True,
+        cascade="all, delete, delete-orphan")
+    ingredients = db.relationship(
+        "Ingredient", backref="account", lazy=True,
+        cascade="all, delete, delete-orphan")
 
     def __init__(self, username, password_hash, role):
         self.username = username
