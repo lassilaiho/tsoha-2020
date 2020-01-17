@@ -15,6 +15,9 @@ class Account(db.Model):
     ingredients = db.relationship(
         "Ingredient", backref="account", lazy=True,
         cascade="all, delete, delete-orphan")
+    shopping_list_items = db.relationship(
+        "ShoppingListItem", backref="account", lazy=True,
+        cascade="all, delete, delete-orphan")
 
     def __init__(self, username, password_hash, role):
         self.username = username

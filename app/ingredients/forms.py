@@ -12,7 +12,7 @@ amount_pattern = re.compile(
 
 class RecipeIngredientForm(FlaskForm):
     amount = StringField("Amount", default="")
-    name = StringField("Name", [validators.required()])
+    name = StringField("Name", default="")
 
     @staticmethod
     def join_amount(value, unit):

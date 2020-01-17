@@ -14,6 +14,9 @@ class Ingredient(db.Model):
     ingredient_amounts = db.relationship(
         "RecipeIngredient", backref="ingredient", lazy=True,
         cascade="all, delete, delete-orphan")
+    shopping_list_items = db.relationship(
+        "ShoppingListItem", backref="ingredient", lazy=True,
+        cascade="all, delete, delete-orphan")
 
     def __init__(self, name):
         self.name = name
@@ -22,15 +25,24 @@ class Ingredient(db.Model):
     def delete_unused_ingredients(account_id):
         stmt = text("""
 DELETE FROM ingredients
-WHERE ingredients.id IN (
-    SELECT ingredients.id
-    FROM ingredients
-    LEFT JOIN recipe_ingredient
-    ON recipe_ingredient.ingredient_id = ingredients.id
-    WHERE ingredients.account_id = :account_id
-    GROUP BY ingredients.id
-    HAVING COUNT(recipe_ingredient.id) = 0
-)""").params(account_id=account_id)
+WHERE
+    ingredients.id IN (
+        SELECT ingredients.id
+        FROM ingredients
+        LEFT JOIN recipe_ingredient
+        ON recipe_ingredient.ingredient_id = ingredients.id
+        WHERE ingredients.account_id = :account_id
+        GROUP BY ingredients.id
+        HAVING COUNT(recipe_ingredient.id) = 0
+    ) AND ingredients.id IN (
+        SELECT ingredients.id
+        FROM ingredients
+        LEFT JOIN shopping_list_items
+        ON shopping_list_items.ingredient_id = ingredients.id
+        WHERE ingredients.account_id = :account_id
+        GROUP BY ingredients.id
+        HAVING COUNT(shopping_list_items.id) = 0
+    )""").params(account_id=account_id)
         db.session().execute(stmt)
 
     @staticmethod

@@ -25,6 +25,10 @@
                         href="{{ url_for('get_recipes') }}">
                         Recipes
                     </a>
+                    <a class="nav-item nav-link"
+                        href="{{ url_for('get_shopping_list') }}">
+                        Shopping List
+                    </a>
                 </div>
                 <div class="form-inline">
                     {% if current_user.is_authenticated %}

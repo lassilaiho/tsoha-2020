@@ -1,0 +1,69 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<h1>Shopping List</h1>
+{% if items.__len__() == 0 %}
+Your shopping list is empty.
+{% endif %}
+<ul class="list-group my-3">
+    {% for item in items %}
+    <li class="list-group-item">
+        <div class="w-100 d-flex">
+            <span class="mr-auto">{{ item["amount"] }} {{ item["name"] }}</span>
+            <button type="button" class="btn btn-primary mr-2"
+                onclick="enableEdit(event)">
+                Edit
+            </button>
+            <button type="submit" class="btn btn-danger" form="delete-form"
+                formaction="{{ url_for('delete_shopping_list_item', item_id=item['id']) }}">
+                Remove
+            </button>
+        </div>
+        <form method="POST" class="form-inline d-none flex-nowrap"
+            action="{{ url_for('update_shopping_list_item', item_id=item['id']) }}">
+            <input name="amount" type="text" class="form-control flex-shrink-2"
+                value="{{ item['amount'] }}" placeholder="Amount" />
+            <input name="name" type="text" class="form-control flex-grow-1 mx-2"
+                value="{{ item['name'].strip() }}" placeholder="Name"
+                required="" />
+            <button type="submit" class="btn btn-primary ml-auto mr-2">
+                Save
+            </button>
+            <button type="reset" class="btn btn-secondary"
+                onclick="cancelEdit(event)">
+                Cancel
+            </button>
+        </form>
+    </li>
+    {% endfor %}
+</ul>
+<div class="d-flex justify-content-end">
+    <button type="submit" class="btn btn-success" form="create-form">
+        Add item
+    </button>
+</div>
+<form id="create-form" class="d-none" method="POST"
+    action="{{ url_for('create_shopping_list_item') }}">
+    <input name="amount" value="" />
+    <input name="name" value="" />
+</form>
+<form id="delete-form" class="d-none" method="POST"></form>
+<script>
+    function enableEdit(e) {
+        const p = e.target.parentNode;
+        toggle(p.nextElementSibling, p);
+    }
+
+    function cancelEdit(e) {
+        const p = e.target.parentNode;
+        toggle(p.previousElementSibling, p);
+    }
+
+    function toggle(show, hide) {
+        show.classList.remove("d-none");
+        show.classList.add("d-flex");
+        hide.classList.remove("d-flex");
+        hide.classList.add("d-none");
+    }
+</script>
+{% endblock %}
