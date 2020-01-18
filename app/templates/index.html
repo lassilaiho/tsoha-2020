@@ -1,5 +1,14 @@
 {% extends "layout.html" %}
 
 {% block body %}
-<p>Hello, world!</p>
+<ul>
+    <li>
+        You have {{ recipe_count }} recipes in your
+        <a href="{{ url_for('get_recipes') }}">recipe book</a>.
+    </li>
+    <li>
+        You have {{ item_count }} items in your
+        <a href="{{ url_for('get_shopping_list') }}">shopping list</a>.
+    </li>
+</ul>
 {% endblock %}
