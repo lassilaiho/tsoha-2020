@@ -5,14 +5,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 
+from app.config import load_config
+
 app = Flask(__name__)
 
-bcrypt = Bcrypt(app)
+app.config.from_object("app.config.DefaultConfig")
+app.config.update(load_config())
 
-if os.environ.get("HEROKU"):
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///recipe-book.db"
+bcrypt = Bcrypt(app)
 
 db = SQLAlchemy(app)
 
