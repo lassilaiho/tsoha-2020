@@ -8,3 +8,13 @@ class LoginForm(FlaskForm):
 
     class Meta:
         csrf = False
+
+
+class RegisterForm(LoginForm):
+    confirm_password = PasswordField(
+        "Confirm Password",
+        [validators.equal_to("password", "Passwords must match")],
+    )
+
+    class Meta:
+        csrf = False

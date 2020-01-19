@@ -3,7 +3,7 @@ from flask_login import login_user, logout_user
 
 from app.main import app, bcrypt, db
 from app.accounts.models import Account
-from app.accounts.forms import LoginForm
+from app.accounts.forms import LoginForm, RegisterForm
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -37,9 +37,10 @@ def logout():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "GET":
-        return render_template("accounts/register.html", form=LoginForm())
-    form = LoginForm(request.form)
+        return render_template("accounts/register.html", form=RegisterForm())
+    form = RegisterForm(request.form)
     if not form.validate():
+        print(form.errors)
         return render_template("accounts/register.html", form=form)
     if Account.query.filter_by(username=form.username.data).count() > 0:
         return render_template(
