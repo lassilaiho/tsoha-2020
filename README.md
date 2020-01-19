@@ -15,6 +15,8 @@ Database diagram for the project.
 
 [Installation](docs/installation.md)
 
+[User manual](docs/user-manual.md)
+
 [User stories](docs/user-stories.md)
 
 [Link to Heroku app](https://tsoha-2020-recipe-book.herokuapp.com)
