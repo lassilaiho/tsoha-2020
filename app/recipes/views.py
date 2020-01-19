@@ -1,9 +1,10 @@
 from flask import render_template, url_for, redirect, request, abort
 from flask_login import login_required, current_user
+from sqlalchemy.sql.expression import false
 
 from app.main import app, db
 from app.recipes.models import Recipe
-from app.recipes.forms import EditRecipeForm
+from app.recipes.forms import EditRecipeForm, GetRecipesForm
 from app.ingredients.models import Ingredient, RecipeIngredient
 from app.ingredients.forms import RecipeIngredientForm
 
@@ -19,9 +20,26 @@ def render_edit_form(action, form):
 @app.route("/recipes")
 @login_required
 def get_recipes():
+    form = GetRecipesForm(request.args)
+    if not form.validate():
+        abort(400)
+    if form.q.data == "":
+        recipes = Recipe.query.filter_by(account_id=current_user.id)
+    else:
+        filter = false()
+        if not form.no_name.data:
+            filter |= Recipe.name.contains(form.q.data, autoescape=True)
+        if not form.no_description.data:
+            filter |= Recipe.description.contains(form.q.data, autoescape=True)
+        if not form.no_steps.data:
+            filter |= Recipe.steps.contains(form.q.data, autoescape=True)
+        filter &= Recipe.account_id == current_user.id
+        recipes = Recipe.query.filter(filter)
+    form.toggle_filters()
     return render_template(
         "recipes/index.html",
-        recipes=Recipe.query.filter_by(account_id=current_user.id),
+        recipes=recipes.order_by(Recipe.name).all(),
+        form=form,
     )
 
 
