@@ -8,6 +8,7 @@ yaml = YAML(typ="safe")
 class DefaultConfig:
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    PORT = 5000
 
 
 def dict_to_config(config_dict):
@@ -19,6 +20,9 @@ def dict_to_config(config_dict):
     x = config_dict.get("database_url")
     if x:
         config["SQLALCHEMY_DATABASE_URI"] = x
+    x = config_dict.get("port")
+    if x:
+        config["PORT"] = int(x)
     return config
 
 
@@ -26,6 +30,7 @@ def from_env():
     return {
         "debug_mode": os.environ.get("DEBUG_MODE"),
         "database_url": os.environ.get("DATABASE_URL"),
+        "port": os.environ.get("PORT"),
     }
 
 
