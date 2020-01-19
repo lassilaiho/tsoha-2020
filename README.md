@@ -13,6 +13,8 @@ to the shopping list, either manually or directly from the recipe view.
 
 Database diagram for the project.
 
+[Installation](docs/installation.md)
+
 [User stories](docs/user-stories.md)
 
 [Link to Heroku app](https://tsoha-2020-recipe-book.herokuapp.com)
