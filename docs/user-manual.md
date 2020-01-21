@@ -23,8 +23,8 @@ view the full details of the recipe To edit a recipe, click the "Edit" button.
 After editing the recipe, you can save the edits by pressing the "Save" button,
 or discard the edits by clicking the "Cancel" button.
 
-To delete a recipe, click the "Delete" button on a recipe. The recipe will be
-deleted permanently.
+To delete a recipe, click the "Delete" button on a recipe. You will be asked for
+a confirmation. If you proceed, the recipe will be deleted permanently.
 
 You can search recipes by using the search field on the recipes page. The
 "Filters" button allows selecting what the search query should match.
