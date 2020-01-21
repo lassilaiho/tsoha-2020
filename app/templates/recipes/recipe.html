@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<h1>
+    {% if recipe.name %}
+    {{ recipe.name }}
+    {% else %}
+    Unnamed recipe
+    {% endif %}
+</h1>
+<p>
+    {% if recipe.description %}
+    {{ recipe.description }}
+    {% else %}
+    No description
+    {% endif %}
+</p>
+<h2>Ingredients</h2>
+{% if recipe.ingredient_amounts %}
+<ol class="list-group">
+    {% for recipe_ingredient in recipe.ingredient_amounts %}
+    <li class="list-group-item">
+        {{ join_amount(
+            recipe_ingredient.amount,
+            recipe_ingredient.amount_unit,
+        ) }}
+        {{ recipe_ingredient.ingredient.name }}
+    </li>
+    {% endfor %}
+</ol>
+{% else %}
+<p>No ingredients</p>
+{% endif %}
+<h2>Steps</h2>
+<p>
+    {% if recipe.steps %}
+    {{ recipe.steps }}
+    {% else %}
+    No steps
+    {% endif %}
+</p>
+<div class="form-group d-flex justify-content-end">
+    <a class="btn btn-primary mr-2"
+        href="{{ url_for('edit_recipe', recipe_id=recipe.id) }}">
+        Edit
+    </a>
+    <a class="btn btn-danger"
+        href="{{ url_for('delete_recipe', recipe_id=recipe.id) }}">
+        Delete
+    </a>
+</div>
+{% endblock %}

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block body %}
-<form method="POST" action="{{ form_action }}">
+<form method="POST" action="{{ save_action }}">
     <div class="form-group">
         <label for="name">{{ form.name.label }}</label>
         {{ form.name(id='name', class='form-control') }}
@@ -25,12 +25,12 @@
         <div id="ingredient-list"></div>
     </div>
     <div class="form-group d-flex justify-content-end">
-        <a class="btn btn-secondary" href="{{ url_for('get_recipes') }}">
-            Cancel
-        </a>
-        <button class="btn btn-primary ml-2" type="submit">
+        <button class="btn btn-primary mr-2" type="submit">
             Save
         </button>
+        <a class="btn btn-secondary" href="{{ cancel_action }}">
+            Cancel
+        </a>
     </div>
 </form>
 <template id="ingredient-row-template">

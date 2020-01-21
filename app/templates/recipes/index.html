@@ -50,7 +50,11 @@
     <div class="card m-1 recipe-card">
         <div class="card-body d-flex flex-column">
             <h5 class="card-title limit-lines _2">
+                {% if recipe.name %}
                 {{ recipe.name }}
+                {% else %}
+                Unnamed recipe
+                {% endif %}
             </h5>
             <p class="card-text limit-lines _5">
                 {{ recipe.description }}

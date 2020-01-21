@@ -9,10 +9,11 @@ from app.ingredients.models import Ingredient, RecipeIngredient
 from app.ingredients.forms import RecipeIngredientForm
 
 
-def render_edit_form(action, form):
+def render_edit_form(save_action, cancel_action, form):
     return render_template(
         "recipes/edit.html",
-        form_action=action,
+        save_action=save_action,
+        cancel_action=cancel_action,
         form=form,
     )
 
@@ -46,7 +47,11 @@ def get_recipes():
 @app.route("/recipes/new")
 @login_required
 def create_recipe_form():
-    return render_edit_form(url_for("create_recipe"), EditRecipeForm())
+    return render_edit_form(
+        url_for("create_recipe"),
+        url_for("get_recipes"),
+        EditRecipeForm(),
+    )
 
 
 @app.route("/recipes/new", methods=["POST"])
@@ -54,7 +59,11 @@ def create_recipe_form():
 def create_recipe():
     form = EditRecipeForm(request.form)
     if not form.validate():
-        return render_edit_form(url_for("create_recipe"), form)
+        return render_edit_form(
+            url_for("create_recipe"),
+            url_for("get_recipes"),
+            form,
+        )
     recipe = Recipe(
         name=form.name.data,
         description=form.description.data,
@@ -78,6 +87,23 @@ def get_recipe(recipe_id: int):
     recipe = Recipe.query.filter_by(
         id=recipe_id,
         account_id=current_user.id,
+    ).first_or_404()
+    ingredients = Ingredient.query.filter_by(
+
+    )
+    return render_template(
+        "recipes/recipe.html",
+        recipe=recipe,
+        join_amount=RecipeIngredientForm.join_amount,
+    )
+
+
+@app.route("/recipes/<int:recipe_id>/edit")
+@login_required
+def edit_recipe(recipe_id: int):
+    recipe = Recipe.query.filter_by(
+        id=recipe_id,
+        account_id=current_user.id,
     ).first()
     if recipe is None:
         abort(404)
@@ -95,7 +121,8 @@ def get_recipe(recipe_id: int):
         })
     return render_edit_form(
         url_for("update_recipe", recipe_id=recipe_id),
-        form,
+        url_for('get_recipe', recipe_id=recipe_id),
+        form
     )
 
 
@@ -106,6 +133,7 @@ def update_recipe(recipe_id: int):
     if not form.validate():
         return render_edit_form(
             url_for("update_recipe", recipe_id=recipe_id),
+            url_for('get_recipe', recipe_id=recipe_id),
             form,
         )
     recipe = Recipe.query.filter_by(
@@ -127,7 +155,7 @@ def update_recipe(recipe_id: int):
         RecipeIngredient.insert(amount, unit, ingredient.id, recipe.id)
     Ingredient.delete_unused_ingredients(current_user.id)
     db.session().commit()
-    return redirect(url_for("get_recipes"))
+    return redirect(url_for("get_recipe", recipe_id=recipe_id))
 
 
 @app.route("/recipes/<int:recipe_id>/delete", methods=["POST"])

@@ -19,7 +19,9 @@ To add a recipe, click the "Add recipe" button, fill in the recipe details and
 click "Save". You can cancel the operation by clicking the "Cancel" button.
 
 To show the full recipe, click the "Details" button on a recipe. Here you can
-view and edit the full details of the recipe.
+view the full details of the recipe To edit a recipe, click the "Edit" button.
+After editing the recipe, you can save the edits by pressing the "Save" button,
+or discard the edits by clicking the "Cancel" button.
 
 To delete a recipe, click the "Delete" button on a recipe. The recipe will be
 deleted permanently.
