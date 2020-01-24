@@ -72,11 +72,7 @@ def create_recipe():
     recipe.account_id = current_user.id
     db.session().add(recipe)
     db.session().flush()
-    for recipe_ingredient_form in form.ingredient_amounts:
-        ingredient = Ingredient.insert_if_missing(
-            recipe_ingredient_form.data["name"].strip(), current_user.id)
-        amount, unit = recipe_ingredient_form.parse_amount()
-        RecipeIngredient.insert(amount, unit, ingredient.id, recipe.id)
+    recipe.insert_ingredients_from_form(form)
     db.session().commit()
     return redirect(url_for("get_recipes"))
 
@@ -88,12 +84,10 @@ def get_recipe(recipe_id: int):
         id=recipe_id,
         account_id=current_user.id,
     ).first_or_404()
-    ingredients = Ingredient.query.filter_by(
-
-    )
     return render_template(
         "recipes/recipe.html",
         recipe=recipe,
+        recipe_ingredients=recipe.get_ingredients().fetchall(),
         join_amount=RecipeIngredientForm.join_amount,
     )
 
@@ -104,19 +98,17 @@ def edit_recipe(recipe_id: int):
     recipe = Recipe.query.filter_by(
         id=recipe_id,
         account_id=current_user.id,
-    ).first()
-    if recipe is None:
-        abort(404)
+    ).first_or_404()
     form = EditRecipeForm()
     form.name.data = recipe.name
     form.description.data = recipe.description
     form.steps.data = recipe.steps
-    for recipe_ingredient in recipe.ingredient_amounts:
+    for recipe_ingredient in recipe.get_ingredients():
         form.ingredient_amounts.append_entry({
-            "name": recipe_ingredient.ingredient.name,
+            "name": recipe_ingredient["name"],
             "amount": RecipeIngredientForm.join_amount(
-                recipe_ingredient.amount,
-                recipe_ingredient.amount_unit,
+                recipe_ingredient["amount"],
+                recipe_ingredient["amount_unit"],
             ),
         })
     return render_edit_form(
@@ -139,20 +131,13 @@ def update_recipe(recipe_id: int):
     recipe = Recipe.query.filter_by(
         id=recipe_id,
         account_id=current_user.id,
-    ).first()
-    if recipe is None:
-        abort(404)
-    for x in RecipeIngredient.query.filter_by(recipe_id=recipe.id):
-        db.session().delete(x)
-    db.session.flush()
+    ).first_or_404()
     recipe.name = form.name.data
     recipe.description = form.description.data
     recipe.steps = form.steps.data
-    for recipe_ingredient_form in form.ingredient_amounts:
-        ingredient = Ingredient.insert_if_missing(
-            recipe_ingredient_form.data["name"].strip(), current_user.id)
-        amount, unit = recipe_ingredient_form.parse_amount()
-        RecipeIngredient.insert(amount, unit, ingredient.id, recipe.id)
+    RecipeIngredient.query.filter_by(recipe_id=recipe.id).delete()
+    db.session.flush()
+    recipe.insert_ingredients_from_form(form)
     Ingredient.delete_unused_ingredients(current_user.id)
     db.session().commit()
     return redirect(url_for("get_recipe", recipe_id=recipe_id))
@@ -161,14 +146,13 @@ def update_recipe(recipe_id: int):
 @app.route("/recipes/<int:recipe_id>/delete", methods=["POST"])
 @login_required
 def delete_recipe(recipe_id: int):
-    recipe = Recipe.query.filter_by(
+    delete_count = Recipe.query.filter_by(
         id=recipe_id,
         account_id=current_user.id,
-    ).first()
-    if recipe is None:
-        abort(404)
-    db.session().delete(recipe)
+    ).delete()
     db.session().flush()
+    if delete_count == 0:
+        abort(404)
     Ingredient.delete_unused_ingredients(current_user.id)
     db.session().commit()
     return redirect(url_for("get_recipes"))

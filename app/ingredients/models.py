@@ -1,4 +1,4 @@
-from sqlalchemy.sql import text
+from sqlalchemy.sql import text, func
 
 from app.main import db
 
@@ -25,29 +25,23 @@ class Ingredient(db.Model):
     def delete_unused_ingredients(account_id):
         stmt = text("""
 DELETE FROM ingredients
-WHERE
-    ingredients.id IN (
-        SELECT ingredients.id
-        FROM ingredients
-        LEFT JOIN recipe_ingredient
-        ON recipe_ingredient.ingredient_id = ingredients.id
-        WHERE ingredients.account_id = :account_id
-        GROUP BY ingredients.id
-        HAVING COUNT(recipe_ingredient.id) = 0
-    ) AND ingredients.id IN (
-        SELECT ingredients.id
-        FROM ingredients
-        LEFT JOIN shopping_list_items
-        ON shopping_list_items.ingredient_id = ingredients.id
-        WHERE ingredients.account_id = :account_id
-        GROUP BY ingredients.id
-        HAVING COUNT(shopping_list_items.id) = 0
-    )""").params(account_id=account_id)
+WHERE ingredients.id IN (
+    SELECT i.id FROM ingredients i
+    LEFT JOIN recipe_ingredient ri ON ri.ingredient_id = i.id
+    LEFT JOIN shopping_list_items sli ON sli.ingredient_id = i.id
+    WHERE
+        i.account_id = :account_id
+        AND ri.id IS NULL
+        AND sli.id IS NULL
+)""").params(account_id=account_id)
         db.session().execute(stmt)
 
     @staticmethod
     def insert_if_missing(name, account_id):
-        x = Ingredient.query.filter(Ingredient.name.ilike(name)).first()
+        x = Ingredient.query.filter(
+            Ingredient.account_id == account_id,
+            func.lower(Ingredient.name) == func.lower(name),
+        ).first()
         if x:
             return x
         x = Ingredient(name)
@@ -57,6 +51,13 @@ WHERE
         return x
 
 
+idx_ingredient_account_id_name_lower = db.Index(
+    "idx_ingredient_account_id_name_lower",
+    Ingredient.account_id,
+    func.lower(Ingredient.name),
+)
+
+
 class RecipeIngredient(db.Model):
     __tablename__ = "recipe_ingredient"
 
@@ -64,18 +65,6 @@ class RecipeIngredient(db.Model):
     amount = db.Column(db.Numeric, nullable=False)
     amount_unit = db.Column(db.String, nullable=False)
     ingredient_id = db.Column(db.Integer, db.ForeignKey(
-        "ingredients.id"), nullable=False)
+        "ingredients.id"), nullable=False, index=True)
     recipe_id = db.Column(db.Integer, db.ForeignKey(
-        "recipes.id"), nullable=False)
-
-    @staticmethod
-    def insert(amount, amount_unit, ingredient_id, recipe_id):
-        x = RecipeIngredient(
-            amount=amount,
-            amount_unit=amount_unit,
-            ingredient_id=ingredient_id,
-            recipe_id=recipe_id,
-        )
-        db.session().add(x)
-        db.session().flush()
-        return x
+        "recipes.id"), nullable=False, index=True)

@@ -18,15 +18,15 @@
     {% endif %}
 </p>
 <h2>Ingredients</h2>
-{% if recipe.ingredient_amounts %}
+{% if recipe_ingredients %}
 <ol class="list-group">
-    {% for recipe_ingredient in recipe.ingredient_amounts %}
+    {% for recipe_ingredient in recipe_ingredients %}
     <li class="list-group-item">
         {{ join_amount(
-            recipe_ingredient.amount,
-            recipe_ingredient.amount_unit,
+            recipe_ingredient["amount"],
+            recipe_ingredient["amount_unit"],
         ) }}
-        {{ recipe_ingredient.ingredient.name }}
+        {{ recipe_ingredient["name"] }}
     </li>
     {% endfor %}
 </ol>

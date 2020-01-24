@@ -1,5 +1,6 @@
 from flask import render_template, request, abort, redirect, url_for
 from flask_login import login_required, current_user
+from sqlalchemy.orm import joinedload
 
 from app.main import app, db
 from app.shopping_list.models import ShoppingListItem
@@ -10,8 +11,11 @@ from app.ingredients.forms import RecipeIngredientForm
 @app.route("/shopping-list")
 @login_required
 def get_shopping_list():
+    item_query = ShoppingListItem.query.filter_by(
+        account_id=current_user.id,
+    ).options(joinedload(ShoppingListItem.ingredient))
     items = []
-    for item in current_user.shopping_list_items:
+    for item in item_query:
         name = item.ingredient.name
         if not name.strip():
             name = "\u00A0"
@@ -54,9 +58,7 @@ def update_shopping_list_item(item_id: int):
     item = ShoppingListItem.query.filter_by(
         id=item_id,
         account_id=current_user.id,
-    ).first()
-    if not item:
-        abort(404)
+    ).first_or_404()
     item.amount, item.amount_unit = form.parse_amount()
     ingredient = Ingredient.insert_if_missing(
         form.name.data.strip(), current_user.id)
@@ -70,14 +72,13 @@ def update_shopping_list_item(item_id: int):
 @app.route("/shopping-list/<int:item_id>/delete", methods=["POST"])
 @login_required
 def delete_shopping_list_item(item_id: int):
-    item = ShoppingListItem.query.filter_by(
+    delete_count = ShoppingListItem.query.filter_by(
         id=item_id,
         account_id=current_user.id,
-    ).first()
-    if item is None:
-        abort(404)
-    db.session().delete(item)
+    ).delete()
     db.session().flush()
+    if delete_count == 0:
+        abort(404)
     Ingredient.delete_unused_ingredients(current_user.id)
     db.session().commit()
     return redirect(url_for("get_shopping_list"))
