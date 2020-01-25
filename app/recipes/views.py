@@ -84,10 +84,35 @@ def get_recipe(recipe_id: int):
         id=recipe_id,
         account_id=current_user.id,
     ).first_or_404()
+    ingredients = []
+    ingredients_by_id = {}
+    for i in recipe.get_ingredients():
+        ingredient = ingredients_by_id.get(i["id"])
+        if ingredient is None:
+            ingredient = {
+                "name": i["name"],
+                "amount": i["amount"],
+                "amount_unit": i["amount_unit"],
+                "shopping_list_amounts": [],
+            }
+            ingredients_by_id[i["id"]] = ingredient
+        ingredients.append({
+            "name": i["name"],
+            "amount": i["amount"],
+            "amount_unit": i["amount_unit"],
+            "shopping_list_amounts": ingredient["shopping_list_amounts"],
+        })
+    for x in recipe.get_shopping_list_amounts():
+        ingredients_by_id[x["id"]]["shopping_list_amounts"].append(
+            RecipeIngredientForm.join_amount(
+                x["amount"],
+                x["unit"],
+            ),
+        )
     return render_template(
         "recipes/recipe.html",
         recipe=recipe,
-        recipe_ingredients=recipe.get_ingredients().fetchall(),
+        recipe_ingredients=ingredients,
         join_amount=RecipeIngredientForm.join_amount,
     )
 

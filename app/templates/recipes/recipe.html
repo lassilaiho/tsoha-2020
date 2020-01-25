@@ -21,12 +21,29 @@
 {% if recipe_ingredients %}
 <ol class="list-group">
     {% for recipe_ingredient in recipe_ingredients %}
-    <li class="list-group-item">
-        {{ join_amount(
-            recipe_ingredient["amount"],
-            recipe_ingredient["amount_unit"],
-        ) }}
-        {{ recipe_ingredient["name"] }}
+    <li class="list-group-item d-flex justify-content-between">
+        <span>
+            {{ join_amount(
+                recipe_ingredient["amount"],
+                recipe_ingredient["amount_unit"],
+            ) }}
+            {{ recipe_ingredient["name"] }}
+        </span>
+        <div class="dropdown">
+            <button type="button" class="btn btn-light dropdown-toggle"
+                data-toggle="dropdown">
+                Amount in shopping list
+            </button>
+            <div class="dropdown-menu">
+                {% for amount in recipe_ingredient["shopping_list_amounts"] %}
+                <span class="dropdown-item-text">{{ amount }}</span>
+                {% else %}
+                <span class="dropdown-item-text">
+                    This ingredient is not in your shopping list.
+                </span>
+                {% endfor %}
+            </div>
+        </div>
     </li>
     {% endfor %}
 </ol>

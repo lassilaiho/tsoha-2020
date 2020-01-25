@@ -25,12 +25,35 @@ class Recipe(db.Model):
 
     def get_ingredients(self):
         stmt = text("""
-SELECT ri.amount amount, ri.amount_unit amount_unit, i.name name
+SELECT ri.amount amount, ri.amount_unit amount_unit, i.id id, i.name name
 FROM ingredients i, recipe_ingredient ri
 WHERE
     ri.recipe_id = :recipe_id
     AND i.account_id = :account_id
     AND ri.ingredient_id = i.id
+""").bindparams(recipe_id=self.id, account_id=self.account_id)
+        return db.session().execute(stmt)
+
+    def get_shopping_list_amounts(self):
+        stmt = text("""
+SELECT
+    i.id id,
+    SUM(sli.amount) amount,
+    sli.amount_unit unit
+FROM (
+    SELECT DISTINCT
+        i.id id,
+        i.name name
+    FROM ingredients i, recipe_ingredient ri
+    WHERE
+        i.account_id = :account_id
+        AND i.id = ri.ingredient_id
+        AND ri.recipe_id = :recipe_id
+) i
+LEFT JOIN shopping_list_items sli
+ON sli.ingredient_id = i.id
+WHERE sli.account_id = :account_id
+GROUP BY i.id, sli.amount_unit
 """).bindparams(recipe_id=self.id, account_id=self.account_id)
         return db.session().execute(stmt)
 
