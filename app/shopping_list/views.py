@@ -1,9 +1,12 @@
+from decimal import Decimal
+
 from flask import render_template, request, abort, redirect, url_for
 from flask_login import login_required, current_user
 from sqlalchemy.orm import joinedload
 
 from app.main import app, db
 from app.shopping_list.models import ShoppingListItem
+from app.shopping_list.forms import AddIngredientToShoppingListForm
 from app.ingredients.models import Ingredient
 from app.ingredients.forms import RecipeIngredientForm
 
@@ -67,6 +70,30 @@ def update_shopping_list_item(item_id: int):
     Ingredient.delete_unused_ingredients(current_user.id)
     db.session().commit()
     return redirect(url_for("get_shopping_list"))
+
+
+@app.route("/shopping-list/add", methods=["POST"])
+@login_required
+def add_ingredient_to_shopping_list():
+    form = AddIngredientToShoppingListForm()
+    if not form.validate():
+        abort(400)
+    item = ShoppingListItem.query.filter_by(
+        account_id=current_user.id,
+        ingredient_id=form.ingredient_id.data,
+        amount_unit=form.amount_unit.data,
+    ).first()
+    if item is None:
+        db.session().add(ShoppingListItem(
+            amount=form.amount.data,
+            amount_unit=form.amount_unit.data,
+            ingredient_id=form.ingredient_id.data,
+            account_id=current_user.id,
+        ))
+    else:
+        item.amount += Decimal(form.amount.data)
+    db.session().commit()
+    return redirect(url_for("get_recipe", recipe_id=form.recipe_id.data))
 
 
 @app.route("/shopping-list/<int:item_id>/delete", methods=["POST"])

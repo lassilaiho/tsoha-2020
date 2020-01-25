@@ -34,14 +34,21 @@
                 data-toggle="dropdown">
                 Amount in shopping list
             </button>
-            <div class="dropdown-menu">
+            <div class="dropdown-menu w-100">
                 {% for amount in recipe_ingredient["shopping_list_amounts"] %}
                 <span class="dropdown-item-text">{{ amount }}</span>
-                {% else %}
-                <span class="dropdown-item-text">
-                    This ingredient is not in your shopping list.
-                </span>
                 {% endfor %}
+                <button type="button" class="dropdown-item"
+                    data-ingredient-id="{{ recipe_ingredient['id'] }}"
+                    data-amount="{{ recipe_ingredient['amount'] }}"
+                    data-amount-unit="{{ recipe_ingredient['amount_unit'] }}"
+                    onclick="addToShoppingList(event)">
+                    {% if recipe_ingredient["shopping_list_amounts"] %}
+                    Click here to add more.
+                    {% else %}
+                    Not in shopping list. Click here to add.
+                    {% endif %}
+                </button>
             </div>
         </div>
     </li>
@@ -74,4 +81,29 @@
     body="Are you sure you want to permanently delete this recipe?",
     action=url_for('delete_recipe', recipe_id=recipe.id),
 )}}
+<form method="POST" action="{{ url_for('add_ingredient_to_shopping_list') }}"
+    id="add-to-shopping-list-form" class="d-none">
+    <input name="recipe_id" value="{{ recipe.id }}" />
+    <input name="ingredient_id" />
+    <input name="amount" />
+    <input name="amount_unit" />
+</form>
+<script>
+    function addToShoppingList(e) {
+        const data = e.target.dataset;
+        const form = document.getElementById("add-to-shopping-list-form");
+        form.querySelector('input[name="ingredient_id"]')
+            .value = data.ingredientId;
+        form.querySelector('input[name="amount"]')
+            .value = data.amount;
+        form.querySelector('input[name="amount_unit"]')
+            .value = data.amountUnit;
+        form.submit();
+    }
+</script>
+<style>
+    .dropdown-menu button {
+        white-space: normal;
+    }
+</style>
 {% endblock %}

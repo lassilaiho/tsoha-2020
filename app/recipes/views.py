@@ -90,6 +90,7 @@ def get_recipe(recipe_id: int):
         ingredient = ingredients_by_id.get(i["id"])
         if ingredient is None:
             ingredient = {
+                "id": i["id"],
                 "name": i["name"],
                 "amount": i["amount"],
                 "amount_unit": i["amount_unit"],
@@ -97,6 +98,7 @@ def get_recipe(recipe_id: int):
             }
             ingredients_by_id[i["id"]] = ingredient
         ingredients.append({
+            "id": i["id"],
             "name": i["name"],
             "amount": i["amount"],
             "amount_unit": i["amount_unit"],
