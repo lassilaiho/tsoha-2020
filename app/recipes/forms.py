@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, StringField, TextAreaField, FormField, FieldList, validators
+from wtforms import BooleanField, StringField, TextAreaField, FormField, FieldList, IntegerField, validators
 from wtforms.fields.html5 import SearchField
 
 from app.ingredients.forms import RecipeIngredientForm
@@ -7,6 +7,7 @@ from app.ingredients.forms import RecipeIngredientForm
 
 class GetRecipesForm(FlaskForm):
     q = SearchField("Search", default="")
+    p = IntegerField("Page", default=1)
     no_name = BooleanField("Name", default=False)
     no_description = BooleanField("Description", default=False)
     no_steps = BooleanField("Steps", default=False)

@@ -24,9 +24,7 @@ def get_recipes():
     form = GetRecipesForm(request.args)
     if not form.validate():
         abort(400)
-    if form.q.data == "":
-        recipes = Recipe.query.filter_by(account_id=current_user.id)
-    else:
+    if form.q.data:
         filter = false()
         if not form.no_name.data:
             filter |= Recipe.name.contains(form.q.data, autoescape=True)
@@ -35,11 +33,15 @@ def get_recipes():
         if not form.no_steps.data:
             filter |= Recipe.steps.contains(form.q.data, autoescape=True)
         filter &= Recipe.account_id == current_user.id
-        recipes = Recipe.query.filter(filter)
+        recipes = Recipe.query.filter(filter).order_by(Recipe.name)
+    else:
+        recipes = Recipe.query.\
+            filter_by(account_id=current_user.id).\
+            order_by(Recipe.id.desc())
     form.toggle_filters()
     return render_template(
         "recipes/index.html",
-        recipes=recipes.order_by(Recipe.name).all(),
+        pagination=recipes.paginate(form.p.data, 10),
         form=form,
     )
 
