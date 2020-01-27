@@ -18,6 +18,7 @@ Database diagram for the project.
 [Link to Heroku app](https://tsoha-2020-recipe-book.herokuapp.com)
 
 Heroku app test accounts:
+
 username|password
 --------|--------
 testikäyttäjä|salasana
