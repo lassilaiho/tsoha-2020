@@ -47,7 +47,8 @@ def register():
             form=form,
             error="Username is already taken.",
         )
-    password_hash = bcrypt.generate_password_hash(form.password.data)
+    password_hash = \
+        bcrypt.generate_password_hash(form.password.data).decode("utf-8")
     account = Account(form.username.data, password_hash, "user")
     db.session().add(account)
     db.session.commit()
