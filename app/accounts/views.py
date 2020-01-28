@@ -1,9 +1,9 @@
-from flask import render_template, redirect, url_for, request
-from flask_login import login_user, logout_user
+from flask import render_template, redirect, url_for, request, jsonify
+from flask_login import login_user, logout_user, login_required, current_user
 
 from app.main import app, bcrypt, db
 from app.accounts.models import Account
-from app.accounts.forms import LoginForm, RegisterForm
+from app.accounts.forms import LoginForm, RegisterForm, ChangePasswordForm
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -40,7 +40,6 @@ def register():
         return render_template("accounts/register.html", form=RegisterForm())
     form = RegisterForm(request.form)
     if not form.validate():
-        print(form.errors)
         return render_template("accounts/register.html", form=form)
     if Account.query.filter_by(username=form.username.data).count() > 0:
         return render_template(
@@ -55,3 +54,30 @@ def register():
     db.session.commit()
     login_user(account)
     return redirect(url_for("index"))
+
+
+@app.route("/my-account")
+@login_required
+def my_account():
+    return render_template(
+        "accounts/index.html",
+        change_password_form=ChangePasswordForm(),
+    )
+
+
+@app.route("/my-account/change-password", methods=["POST"])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if not form.validate():
+        return jsonify(error_messages=form.errors), 400
+    if not bcrypt.check_password_hash(
+            current_user.password_hash,
+            form.current_password.data):
+        return jsonify(error_messages={
+            "current_password": ["Current password is incorrect"],
+        }), 400
+    current_user.password_hash = \
+        bcrypt.generate_password_hash(form.new_password.data).decode("utf-8")
+    db.session().commit()
+    return ""

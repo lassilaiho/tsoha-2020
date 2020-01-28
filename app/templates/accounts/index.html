@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<h1>My Account</h1>
+<p><strong>Username:</strong> {{ current_user.username }}</p>
+<button type="button" class="btn btn-primary" data-toggle="modal"
+    data-target="#password-change-modal">
+    Change password
+</button>
+<div class="modal fade" id="password-change-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Change password
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="password-change-form" method="POST"
+                    action="{{ url_for('change_password') }}"
+                    onsubmit="changePassword(event)">
+                    <div id="current_password-group" class="form-group">
+                        {{ change_password_form.current_password.label }}
+                        {{ change_password_form.current_password(
+                            class="form-control"
+                        ) }}
+                        <p class="error-display text-danger"></p>
+                    </div>
+                    <div id="new_password-group" class="form-group">
+                        {{ change_password_form.new_password.label }}
+                        {{ change_password_form.new_password(
+                            class="form-control"
+                        ) }}
+                        <p class="error-display text-danger">
+                        </p>
+                    </div>
+                    <div id="confirm_new_password-group" class="form-group">
+                        {{ change_password_form.confirm_new_password.label }}
+                        {{ change_password_form.confirm_new_password(
+                            class="form-control"
+                        ) }}
+                        <p class="error-display text-danger"></p>
+                    </div>
+                    <p id="other-error-display"
+                        class="error-display text-danger"></p>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" form="password-change-form"
+                    class="btn btn-primary">
+                    Change
+                </button>
+                <button type="button" class="btn btn-secondary"
+                    data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let passwordChangeModal, passwordChangeForm;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        passwordChangeModal = $("#password-change-modal");
+        passwordChangeModal.on("hidden.bs.modal", () => {
+            passwordChangeForm.reset();
+            passwordChangeModal.find(".error-display").empty();
+        });
+
+        passwordChangeForm = document.getElementById("password-change-form");
+    });
+
+    function changePassword(e) {
+        e.preventDefault();
+        const form = e.target;
+        $(form).find(".error-display").empty();
+        $.ajax({
+            url: form.action,
+            type: form.method,
+            data: {
+                current_password: form.elements.current_password.value,
+                new_password: form.elements.new_password.value,
+                confirm_new_password: form.elements.confirm_new_password.value,
+            },
+            success: () => passwordChangeModal.modal("hide"),
+            error: (jqXHR, status, err) => {
+                if (status === "error" && err === "BAD REQUEST") {
+                    const errMsgs = jqXHR.responseJSON.error_messages;
+                    for (const msgField in errMsgs) {
+                        const errorDisplay = $(form).find(
+                            "#" + msgField + "-group .error-display");
+                        errMsgs[msgField].forEach((msg, i) => {
+                            if (i > 0) {
+                                errorDisplay.append(document.createElement("br"));
+                            }
+                            errorDisplay.append(msg);
+                        });
+                    }
+                } else {
+                    $("#other-error-display").text("Something went wrong.");
+                }
+            },
+        });
+    }
+</script>
+{% endblock %}

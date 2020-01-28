@@ -10,6 +10,10 @@ When logged in, your username is displayed at the right side of the navigation
 bar. You can log out of the application by clicking the "Logout" link on the
 navigation bar next to the username.
 
+You can change the password of your account by clicking the "My Account" link on
+the navigation bar. Then click the "Change password" button and follow the
+instructions to change the password.
+
 ## Recipes
 You can see your recipes at the recipes page, which you can open by clicking the
 "Recipes" link on the navigation bar. Here recipes can be added, viewed and
