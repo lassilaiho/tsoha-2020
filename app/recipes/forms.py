@@ -26,6 +26,3 @@ class EditRecipeForm(FlaskForm):
     description = TextAreaField("Description", default="")
     steps = TextAreaField("Steps", default="")
     ingredient_amounts = FieldList(FormField(RecipeIngredientForm))
-
-    class Meta:
-        csrf = False

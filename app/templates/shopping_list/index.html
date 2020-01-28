@@ -33,6 +33,7 @@ Your shopping list is empty.
                 onclick="cancelEdit(event)">
                 Cancel
             </button>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
         </form>
     </li>
     {% endfor %}
@@ -46,8 +47,11 @@ Your shopping list is empty.
     action="{{ url_for('create_shopping_list_item') }}">
     <input name="amount" value="" />
     <input name="name" value="" />
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 </form>
-<form id="delete-form" class="d-none" method="POST"></form>
+<form id="delete-form" class="d-none" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+</form>
 <script>
     function enableEdit(e) {
         const p = e.target.parentNode;

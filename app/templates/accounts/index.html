@@ -65,6 +65,14 @@
     let passwordChangeModal, passwordChangeForm;
 
     document.addEventListener("DOMContentLoaded", () => {
+        $.ajaxSetup({
+            beforeSend: (xhr, settings) => {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token() }}");
+                }
+            }
+        });
+
         passwordChangeModal = $("#password-change-modal");
         passwordChangeModal.on("hidden.bs.modal", () => {
             passwordChangeForm.reset();

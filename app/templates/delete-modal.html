@@ -19,6 +19,8 @@
                     data-dismiss="modal">
                     Cancel
                 </button>
+                <input type="hidden" name="csrf_token"
+                    value="{{ csrf_token() }}" />
             </form>
         </div>
     </div>

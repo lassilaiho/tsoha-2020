@@ -87,6 +87,7 @@
     <input name="ingredient_id" />
     <input name="amount" />
     <input name="amount_unit" />
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 </form>
 <script>
     function addToShoppingList(e) {

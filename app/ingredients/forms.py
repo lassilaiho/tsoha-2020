@@ -27,6 +27,3 @@ class RecipeIngredientForm(FlaskForm):
             return Decimal(match.group("value")), match.group("unit").strip()
         else:
             return Decimal(1), self.amount.data.strip()
-
-    class Meta:
-        csrf = False

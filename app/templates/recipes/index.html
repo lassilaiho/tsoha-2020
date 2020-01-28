@@ -106,7 +106,9 @@
         </button>
     </li>
 </ul>
-<form id="delete-recipe-form" method="POST"></form>
+<form id="delete-recipe-form" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+</form>
 {{ delete_modal(id='delete-modal', title='Delete recipe')}}
 <style>
     .recipe-card {

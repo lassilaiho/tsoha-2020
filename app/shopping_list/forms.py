@@ -7,6 +7,3 @@ class AddIngredientToShoppingListForm(FlaskForm):
     ingredient_id = IntegerField(validators=[validators.input_required()])
     amount = FloatField(default=1.0)
     amount_unit = TextField(default="")
-
-    class Meta:
-        csrf = False
