@@ -7,7 +7,7 @@ class Ingredient(db.Model):
     __tablename__ = "ingredients"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
+    name = db.Column(db.Text, nullable=False)
     account_id = db.Column(db.Integer, db.ForeignKey(
         "accounts.id"), nullable=False)
 
@@ -63,7 +63,7 @@ class RecipeIngredient(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Numeric, nullable=False)
-    amount_unit = db.Column(db.String, nullable=False)
+    amount_unit = db.Column(db.Text, nullable=False)
     ingredient_id = db.Column(db.Integer, db.ForeignKey(
         "ingredients.id"), nullable=False, index=True)
     recipe_id = db.Column(db.Integer, db.ForeignKey(

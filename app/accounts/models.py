@@ -7,9 +7,8 @@ class Account(db.Model):
     __tablename__ = "accounts"
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, nullable=False, unique=True)
-    password_hash = db.Column(db.String, nullable=False)
-    role = db.Column(db.String, nullable=False)
+    username = db.Column(db.Text, nullable=False, unique=True)
+    password_hash = db.Column(db.Text, nullable=False)
 
     recipes = db.relationship(
         "Recipe", backref="account", lazy=True,
@@ -21,10 +20,9 @@ class Account(db.Model):
         "ShoppingListItem", backref="account", lazy=True,
         cascade="all, delete, delete-orphan")
 
-    def __init__(self, username, password_hash, role):
+    def __init__(self, username, password_hash):
         self.username = username
         self.password_hash = password_hash
-        self.role = role
 
     def get_id(self):
         return str(self.id)
