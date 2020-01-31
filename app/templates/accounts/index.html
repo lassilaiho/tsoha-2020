@@ -1,11 +1,17 @@
 {% extends "layout.html" %}
 
+{% from "delete-modal.html" import delete_modal %}
+
 {% block body %}
 <h1>My Account</h1>
 <p><strong>Username:</strong> {{ current_user.username }}</p>
 <button type="button" class="btn btn-primary" data-toggle="modal"
     data-target="#password-change-modal">
     Change password
+</button>
+<button type="button" class="btn btn-danger" data-toggle="modal"
+    data-target="#delete-account-modal">
+    Delete account
 </button>
 <div class="modal fade" id="password-change-modal">
     <div class="modal-dialog">
@@ -61,6 +67,12 @@
         </div>
     </div>
 </div>
+{{ delete_modal(
+    id="delete-account-modal",
+    title="Delete account",
+    body="Are you sure you want to delete your account and all data associated with it. This action is IRREVERSIBLE.",
+    action=url_for("delete_my_account"),
+) }}
 <script>
     let passwordChangeModal, passwordChangeForm;
 

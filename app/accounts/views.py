@@ -81,3 +81,13 @@ def change_password():
         bcrypt.generate_password_hash(form.new_password.data).decode("utf-8")
     db.session().commit()
     return ""
+
+
+@app.route("/my-account/delete", methods=["POST"])
+@login_required
+def delete_my_account():
+    db.session().delete(
+        Account.query.filter_by(id=current_user.id).first_or_404())
+    logout_user()
+    db.session().commit()
+    return redirect(url_for("index"))
