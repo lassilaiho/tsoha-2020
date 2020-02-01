@@ -40,6 +40,7 @@
             placeholder="Amount">
         <input class="form-control flex-grow-1 ml-2 name-input" required=""
             type="text" value="" placeholder="Ingredient">
+        <datalist></datalist>
         <button type="button" class="btn btn-danger ml-2"
             onclick="removeIngredient(event)">
             Remove
@@ -48,6 +49,7 @@
 </template>
 <script>
     let ingredientList;
+    const completers = [];
     let ingredientRowTemplate;
 
     const ingredients = JSON.parse(`{
@@ -69,13 +71,17 @@
 
         for (let i = 0; i < ingredients.initialValues.length; i++) {
             const { amount, name } = ingredients.initialValues[i];
-            ingredientList.append(createIngredientRow(i, amount, name));
+            const [row, completer] = createIngredientRow(i, amount, name);
+            ingredientList.append(row);
+            completers.push(completer);
         }
     });
 
 
     function addIngredient() {
-        ingredientList.append(createIngredientRow(ingredients.count++, "", ""));
+        const [row, completer] = createIngredientRow(ingredients.count++, "", "");
+        ingredientList.append(row);
+        completers.push(completer);
     }
 
     function removeIngredient(event) {
@@ -91,9 +97,13 @@
             const nameInput = next.querySelector(".name-input");
             nameInput.id = `ingredient_amounts-${newIndex}-name`;
             nameInput.name = nameInput.id;
+            const dataList = next.querySelector("datalist");
+            dataList.id = `ingredient_amounts-${newIndex}-datalist`;
+            nameInput.setAttribute("list", dataList.id);
             next = next.nextElementSibling;
         }
         row.remove();
+        completers.splice(index, 1)[0].dispose();
         ingredients.count--;
     }
 
@@ -108,7 +118,15 @@
         nameInput.id = `ingredient_amounts-${index}-name`;
         nameInput.name = nameInput.id;
         nameInput.value = name;
-        return row;
+        const dataList = row.querySelector("datalist");
+        dataList.id = `ingredient_amounts-${index}-datalist`;
+        const completer = new Autocompleter(
+            "{{ url_for('ingredient_completions') }}",
+            nameInput,
+            dataList,
+        );
+        return [row, completer];
     }
 </script>
+<script src="/static/js/autocomplete.js"></script>
 {% endblock %}

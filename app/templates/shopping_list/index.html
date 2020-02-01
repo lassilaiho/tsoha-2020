@@ -7,7 +7,7 @@ Your shopping list is empty.
 {% endif %}
 <ul class="list-group my-3">
     {% for item in items %}
-    <li class="list-group-item">
+    <li class="list-group-item shopping-list-item">
         <div class="w-100 d-flex">
             <span class="mr-auto">{{ item["amount"] }} {{ item["name"] }}</span>
             <button type="button" class="btn btn-primary mr-2"
@@ -25,7 +25,8 @@ Your shopping list is empty.
                 value="{{ item['amount'] }}" placeholder="Amount" />
             <input name="name" type="text" class="form-control flex-grow-1 mx-2"
                 value="{{ item['name'].strip() }}" placeholder="Name"
-                required="" />
+                required="" list="{{ loop.index }}-datalist" />
+            <datalist id="{{ loop.index }}-datalist"></datalist>
             <button type="submit" class="btn btn-primary ml-auto mr-2">
                 Save
             </button>
@@ -53,6 +54,17 @@ Your shopping list is empty.
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 </form>
 <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const itemForms = document.querySelectorAll(".shopping-list-item form");
+        for (const itemForm of itemForms) {
+            new Autocompleter(
+                "{{ url_for('ingredient_completions') }}",
+                itemForm.querySelector('input[name="name"]'),
+                itemForm.querySelector("datalist"),
+            );
+        }
+    });
+
     function enableEdit(e) {
         const p = e.target.parentNode;
         toggle(p.nextElementSibling, p);
@@ -70,4 +82,5 @@ Your shopping list is empty.
         hide.classList.add("d-none");
     }
 </script>
+<script src="/static/js/autocomplete.js"></script>
 {% endblock %}
