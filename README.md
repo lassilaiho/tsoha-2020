@@ -9,13 +9,11 @@ remove recipes. A user has an account, and can only manage their own recipes.
 The app also features a shopping list for ingredients. Users can add ingredients
 to the shopping list, either manually or directly from the recipe view.
 
-![Database diagram](docs/database-diagram.svg)
-
-Database diagram for the project.
-
 [Installation](docs/installation.md)
 
 [User manual](docs/user-manual.md)
+
+[Database design](docs/database-design.md)
 
 [User stories](docs/user-stories.md)
 
