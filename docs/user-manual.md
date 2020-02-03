@@ -14,6 +14,11 @@ You can change the password of your account by clicking the "My Account" link on
 the navigation bar. Then click the "Change password" button and follow the
 instructions to change the password.
 
+You are able to delete your account by clicking the "Delete account" button on
+the "My Account" page. You will be asked for a confirmation. After confirming
+the deletion, your account and all data associated with it will be permanently
+deleted. Note that there is no way to recover a deleted account.
+
 ## Recipes
 You can see your recipes at the recipes page, which you can open by clicking the
 "Recipes" link on the navigation bar. Here recipes can be added, viewed and
