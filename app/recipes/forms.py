@@ -22,7 +22,8 @@ class GetRecipesForm(FlaskForm):
 
 
 class EditRecipeForm(FlaskForm):
-    name = StringField("Name", default="")
+    name = StringField(
+        "Name", [validators.data_required("Name must not be empty")])
     description = TextAreaField("Description", default="")
     steps = TextAreaField("Steps", default="")
     ingredient_amounts = FieldList(FormField(RecipeIngredientForm))
