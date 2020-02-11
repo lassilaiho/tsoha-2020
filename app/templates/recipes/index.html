@@ -20,7 +20,8 @@
                 data-toggle="dropdown">
                 Filters
             </button>
-            <div class="dropdown-menu p-2 search-filters">
+            <div class="dropdown-menu p-2 search-filters"
+                onclick="stopPropagation(event)">
                 <div class="d-flex flex-column align-items-start">
                     <div class="form-check">
                         {{ form.no_name(class="form-check-input") }}
@@ -164,6 +165,10 @@
 
     function toPage(e) {
         pageInput.value = e.target.dataset.page;
+    }
+
+    function stopPropagation(e) {
+        e.stopPropagation();
     }
 </script>
 {% endblock %}
