@@ -5,7 +5,7 @@
 {% if items.__len__() == 0 %}
 Your shopping list is empty.
 {% endif %}
-<ul class="list-group my-3">
+<ul id="shopping-list-container" class="list-group my-3">
     {% for item in items %}
     <li class="list-group-item shopping-list-item">
         <div class="w-100 d-flex">
@@ -25,7 +25,7 @@ Your shopping list is empty.
                 value="{{ item['amount'] }}" placeholder="Amount" />
             <input name="name" type="text" class="form-control flex-grow-1 mx-2"
                 value="{{ item['name'].strip() }}" placeholder="Name"
-                required="" list="{{ loop.index }}-datalist" />
+                required="" />
             <datalist id="{{ loop.index }}-datalist"></datalist>
             <button type="submit" class="btn btn-primary ml-auto mr-2">
                 Save
@@ -38,23 +38,42 @@ Your shopping list is empty.
         </form>
     </li>
     {% endfor %}
+    <li id="new-shopping-list-item"
+        class="d-none list-group-item shopping-list-item">
+        <form method="POST" class="form-inline flex-nowrap"
+            action="{{ url_for('create_shopping_list_item') }}">
+            <input name="amount" type="text" class="form-control flex-shrink-2"
+                value="" placeholder="Amount" />
+            <input name="name" type="text" class="form-control flex-grow-1 mx-2"
+                value="" placeholder="Name" required="" />
+            <datalist id="new-item-datalist"></datalist>
+            <button type="submit" class="btn btn-primary ml-auto mr-2">
+                Save
+            </button>
+            <button type="reset" class="btn btn-secondary"
+                onclick="cancelAddItem()">
+                Cancel
+            </button>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        </form>
+    </li>
 </ul>
 <div class="d-flex justify-content-end">
-    <button type="submit" class="btn btn-success" form="create-form">
+    <button id="add-item-button" type="button" class="btn btn-success"
+        onclick="addItem()">
         Add item
     </button>
 </div>
-<form id="create-form" class="d-none" method="POST"
-    action="{{ url_for('create_shopping_list_item') }}">
-    <input name="amount" value="" />
-    <input name="name" value="" />
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-</form>
 <form id="delete-form" class="d-none" method="POST">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 </form>
 <script>
+    let addElementButton, newItem;
+
     document.addEventListener("DOMContentLoaded", () => {
+        addElementButton = document.getElementById("add-item-button");
+        newItem = document.getElementById("new-shopping-list-item");
+
         const itemForms = document.querySelectorAll(".shopping-list-item form");
         for (const itemForm of itemForms) {
             new Autocompleter(
@@ -80,6 +99,14 @@ Your shopping list is empty.
         show.classList.add("d-flex");
         hide.classList.remove("d-flex");
         hide.classList.add("d-none");
+    }
+
+    function addItem() {
+        toggle(newItem, addElementButton);
+    }
+
+    function cancelAddItem() {
+        toggle(addElementButton, newItem);
     }
 </script>
 <script src="/static/js/autocomplete.js"></script>
