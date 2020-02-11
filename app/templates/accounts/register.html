@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 
 {% block body %}
+<h1>Register</h1>
 <form method="POST" action="{{ url_for('register') }}">
     <div class="form-group row">
         {{ form.username.label(class="col-3") }}
