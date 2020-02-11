@@ -30,6 +30,13 @@ the app reads a YAML formatted configuration file from the path specified by the
 variable. Settings are specified at the top-level of the YAML document. Omitted
 settings are set to their default values.
 
+A sample configuration file:
+```yaml
+debug_mode: false
+database_url: sqlite:///recipe-book.db
+port: 5000
+```
+
 ### Environment variables
 If the environment variable `RECIPE_BOOK_CONFIG` is empty or not defined and
 `RECIPE_BOOK_CONFIG_ENV` is set to a non-empty value, the app reads the
