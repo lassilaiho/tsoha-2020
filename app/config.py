@@ -35,10 +35,9 @@ def from_env():
 
 
 def load_config():
+    config = from_env()
     config_path = os.environ.get("RECIPE_BOOK_CONFIG")
     if config_path:
         with open(config_path, "r") as f:
-            return dict_to_config(yaml.load(f))
-    if os.environ.get("RECIPE_BOOK_CONFIG_ENV"):
-        return dict_to_config(from_env())
-    return {}
+            config = {**config, **yaml.load(f)}
+    return dict_to_config(config)

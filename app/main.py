@@ -6,11 +6,11 @@ from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from flask_wtf.csrf import CSRFProtect
 
-from app.config import load_config
+from app.config import DefaultConfig, load_config
 
 app = Flask(__name__)
 
-app.config.from_object("app.config.DefaultConfig")
+app.config.from_object(DefaultConfig)
 app.config.update(load_config())
 
 bcrypt = Bcrypt(app)

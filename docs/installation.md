@@ -38,12 +38,11 @@ port: 5000
 ```
 
 ### Environment variables
-If the environment variable `RECIPE_BOOK_CONFIG` is empty or not defined and
-`RECIPE_BOOK_CONFIG_ENV` is set to a non-empty value, the app reads the
-configuration from environment variables. The variables are upper-case variants
-of the configuration settings. For example, to enable `debug_mode`, set the
-environment variable `DEBUG_MODE` to `true`. Omitted settings are set to their
-default values.
+The app reads configuration variables from environment variables. The variables
+are upper-case variants of the configuration variables. For example, to enable
+`debug_mode`, set the environment variable `DEBUG_MODE` to `true`. Omitted
+settings are set to their default values. Settings from a configuration file
+take precedence over settings read from environment variables.
 
 ## Heroku
 The project includes a `Procfile` for use in Heroku. Configuration can be
