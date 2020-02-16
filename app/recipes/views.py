@@ -1,8 +1,8 @@
 from flask import render_template, url_for, redirect, request, abort
-from flask_login import login_required, current_user
+from flask_login import current_user
 from sqlalchemy.sql.expression import false
 
-from app.main import app, db
+from app.main import app, db, login_required
 from app.recipes.models import Recipe
 from app.recipes.forms import EditRecipeForm, GetRecipesForm
 from app.ingredients.models import Ingredient, RecipeIngredient

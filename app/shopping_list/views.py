@@ -1,10 +1,10 @@
 from decimal import Decimal
 
 from flask import render_template, request, abort, redirect, url_for
-from flask_login import login_required, current_user
+from flask_login import current_user
 from sqlalchemy.orm import joinedload
 
-from app.main import app, db
+from app.main import app, db, login_required
 from app.shopping_list.models import ShoppingListItem
 from app.shopping_list.forms import AddIngredientToShoppingListForm
 from app.ingredients.models import Ingredient

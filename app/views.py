@@ -1,7 +1,7 @@
 from flask import render_template
-from flask_login import current_user, login_required
+from flask_login import current_user
 
-from app.main import app
+from app.main import app, login_required
 from app.accounts.models import Account
 
 

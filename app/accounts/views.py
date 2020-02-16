@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, jsonify
-from flask_login import login_user, logout_user, login_required, current_user
+from flask_login import login_user, logout_user, current_user
 
-from app.main import app, bcrypt, db
+from app.main import app, bcrypt, db, login_required
 from app.accounts.models import Account
 from app.accounts.forms import LoginForm, RegisterForm, ChangePasswordForm
 
@@ -49,7 +49,11 @@ def register():
         )
     password_hash = \
         bcrypt.generate_password_hash(form.password.data).decode("utf-8")
-    account = Account(form.username.data, password_hash, "user")
+    account = Account(
+        username=form.username.data,
+        password_hash=password_hash,
+        role="user",
+    )
     db.session().add(account)
     db.session.commit()
     login_user(account)

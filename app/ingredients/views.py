@@ -1,8 +1,8 @@
 from flask import request, jsonify
-from flask_login import login_required, current_user
+from flask_login import current_user
 from sqlalchemy.sql.expression import select
 
-from app.main import app, db
+from app.main import app, db, login_required
 from app.ingredients.models import Ingredient
 
 

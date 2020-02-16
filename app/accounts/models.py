@@ -9,6 +9,7 @@ class Account(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.Text, nullable=False, unique=True)
     password_hash = db.Column(db.Text, nullable=False)
+    role = db.Column(db.Text, nullable=False)
 
     recipes = db.relationship(
         "Recipe", backref="account", lazy=True,
@@ -19,10 +20,6 @@ class Account(db.Model):
     shopping_list_items = db.relationship(
         "ShoppingListItem", backref="account", lazy=True,
         cascade="all, delete, delete-orphan")
-
-    def __init__(self, username, password_hash):
-        self.username = username
-        self.password_hash = password_hash
 
     def get_id(self):
         return str(self.id)
@@ -35,6 +32,17 @@ class Account(db.Model):
 
     def is_authenticated(self):
         return True
+
+    def fullfills_role(self, role):
+        """
+        Checks if this Account fullfills `role`.
+
+        The role "user" is fullfilled by roles "user" and "admin". The role
+        "admin" is fullfilled by role "admin".
+        """
+        if self.role == role:
+            return True
+        return self.role == "admin" and role == "user"
 
     @staticmethod
     def get_item_and_recipe_counts(account_id):
