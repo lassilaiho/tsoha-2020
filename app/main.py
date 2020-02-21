@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_bcrypt import Bcrypt
 from flask_wtf.csrf import CSRFProtect
+from sqlalchemy import event, engine
 
 from app.config import DefaultConfig, load_config
 
@@ -39,3 +40,13 @@ def login_required(_func=None, *, required_role="user"):
             return func(*args, **kwargs)
         return decorated_view
     return wrapper if _func is None else wrapper(_func)
+
+
+def enable_sqlite_foreign_keys(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
+
+
+if app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite"):
+    event.listen(engine.Engine, "connect", enable_sqlite_foreign_keys)
