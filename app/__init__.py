@@ -14,3 +14,8 @@ import_module("app.shopping_list.models")
 import_module("app.shopping_list.views")
 
 db.create_all()
+# All connections must be disposed here because the app will be forked to
+# multiple worker processes. psycopg2 driver connection objects do not support
+# multiprocessing and will cause errors if multiple workers share the same
+# connection. After forking each process will make a new connection on demand.
+db.engine.dispose()
