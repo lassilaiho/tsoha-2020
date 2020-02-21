@@ -25,7 +25,7 @@ class Recipe(db.Model):
 
     def get_ingredients(self):
         stmt = text("""
-SELECT ri.amount amount, ri.amount_unit amount_unit, i.id id, i.name name
+SELECT ri.amount AS amount, ri.amount_unit AS amount_unit, i.id AS id, i.name AS name
 FROM ingredients i, recipe_ingredient ri
 WHERE
     ri.recipe_id = :recipe_id
@@ -37,13 +37,13 @@ WHERE
     def get_shopping_list_amounts(self):
         stmt = text("""
 SELECT
-    i.id id,
-    SUM(sli.amount) amount,
-    sli.amount_unit unit
+    i.id AS id,
+    SUM(sli.amount) AS amount,
+    sli.amount_unit AS unit
 FROM (
     SELECT DISTINCT
-        i.id id,
-        i.name name
+        i.id AS id,
+        i.name AS name
     FROM ingredients i, recipe_ingredient ri
     WHERE
         i.account_id = :account_id
