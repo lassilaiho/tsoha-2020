@@ -12,11 +12,13 @@ class Recipe(db.Model):
     description = db.Column(db.Text(), nullable=False)
     steps = db.Column(db.Text(), nullable=False)
     account_id = db.Column(db.Integer, db.ForeignKey(
-        "accounts.id"), nullable=False, index=True)
+        "accounts.id",
+        ondelete="CASCADE",
+    ), nullable=False, index=True)
 
     ingredient_amounts = db.relationship(
         "RecipeIngredient", backref="recipe", lazy=True,
-        cascade="all, delete, delete-orphan")
+        passive_deletes=True)
 
     def __init__(self, name, description, steps):
         self.name = name

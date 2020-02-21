@@ -8,6 +8,12 @@ class ShoppingListItem(db.Model):
     amount = db.Column(db.Numeric, nullable=False)
     amount_unit = db.Column(db.Text, nullable=False)
     ingredient_id = db.Column(
-        db.Integer, db.ForeignKey("ingredients.id"), nullable=False, index=True)
+        db.Integer, db.ForeignKey(
+            "ingredients.id",
+            ondelete="CASCADE",
+        ), nullable=False, index=True)
     account_id = db.Column(
-        db.Integer, db.ForeignKey("accounts.id"), nullable=False, index=True)
+        db.Integer, db.ForeignKey(
+            "accounts.id",
+            ondelete="CASCADE",
+        ), nullable=False, index=True)

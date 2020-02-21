@@ -13,13 +13,13 @@ class Account(db.Model):
 
     recipes = db.relationship(
         "Recipe", backref="account", lazy=True,
-        cascade="all, delete, delete-orphan")
+        passive_deletes=True)
     ingredients = db.relationship(
         "Ingredient", backref="account", lazy=True,
-        cascade="all, delete, delete-orphan")
+        passive_deletes=True)
     shopping_list_items = db.relationship(
         "ShoppingListItem", backref="account", lazy=True,
-        cascade="all, delete, delete-orphan")
+        passive_deletes=True)
 
     def get_id(self):
         return str(self.id)
