@@ -1,5 +1,14 @@
 {% extends "layout.html" %}
 
+{% macro display_errors(errors) %}
+<div class="text-danger">
+    {% for error in errors %}
+    {{ error }}
+    {% if loop.nextitem %}<br />{% endif %}
+    {% endfor %}
+</div>
+{% endmacro %}
+
 {% block body %}
 <h1>Shopping List</h1>
 {% if items.__len__() == 0 %}
@@ -19,18 +28,25 @@ Your shopping list is empty.
                 Remove
             </button>
         </div>
-        <form method="POST" class="form-inline d-none flex-nowrap"
+        <form method="POST"
+            class="form-inline d-none flex-nowrap align-items-start"
             action="{{ url_for('update_shopping_list_item', item_id=item['id']) }}">
-            <input name="amount" type="text" class="form-control flex-shrink-2"
-                value="{{ item['amount'] }}" placeholder="Amount" />
-            <input name="name" type="text" class="form-control flex-grow-1 mx-2"
-                value="{{ item['name'].strip() }}" placeholder="Name"
-                required="" />
+            <div class="d-flex flex-column">
+                <input name="amount" type="text" class="form-control"
+                    value="{{ item['amount'] }}" placeholder="Amount" />
+                {{ display_errors(item["amount_errors"]) }}
+            </div>
+            <div class="d-flex flex-column flex-grow-1 mx-2">
+                <input name="name" type="text" class="form-control"
+                    value="{{ item['name'].strip() }}" placeholder="Name"
+                    required="" />
+                {{ display_errors(item["name_errors"]) }}
+            </div>
             <datalist id="{{ loop.index }}-datalist"></datalist>
-            <button type="submit" class="btn btn-primary ml-auto mr-2">
+            <button type="submit" class="btn btn-primary mx-2">
                 Save
             </button>
-            <button type="reset" class="btn btn-secondary"
+            <button type="reset" class="btn btn-secondary cancel-edit-button"
                 onclick="cancelEdit(event)">
                 Cancel
             </button>
@@ -40,14 +56,32 @@ Your shopping list is empty.
     {% endfor %}
     <li id="new-shopping-list-item"
         class="d-none list-group-item shopping-list-item">
-        <form method="POST" class="form-inline flex-nowrap"
+        <form method="POST"
+            class="w-100 form-inline flex-nowrap align-items-start"
             action="{{ url_for('create_shopping_list_item') }}">
-            <input name="amount" type="text" class="form-control flex-shrink-2"
-                value="" placeholder="Amount" />
-            <input name="name" type="text" class="form-control flex-grow-1 mx-2"
-                value="" placeholder="Name" required="" />
+            <div class="d-flex flex-column">
+                {% if new_form %}
+                <input name="amount" type="text" class="form-control"
+                    value="{{ new_form.amount.data }}" placeholder="Amount" />
+                {{ display_errors(new_form.amount.errors) }}
+                {% else %}
+                <input name="amount" type="text" class="form-control" value=""
+                    placeholder="Amount" />
+                {% endif %}
+            </div>
+            <div class="d-flex flex-column flex-grow-1 mx-2">
+                {% if new_form %}
+                <input name="name" type="text" class="form-control"
+                    value="{{ new_form.name.data }}" placeholder="Name"
+                    required="" />
+                {{ display_errors(new_form.name.errors) }}
+                {% else %}
+                <input name="name" type="text" class="form-control" value=""
+                    placeholder="Name" required="" />
+                {% endif %}
+            </div>
             <datalist id="new-item-datalist"></datalist>
-            <button type="submit" class="btn btn-primary ml-auto mr-2">
+            <button type="submit" class="btn btn-primary mx-2">
                 Save
             </button>
             <button type="reset" class="btn btn-secondary"
@@ -68,19 +102,36 @@ Your shopping list is empty.
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 </form>
 <script>
+    const isNew = {% if new_form %}true{% else %} false{% endif %};
+    const incorrectIndex = {{ incorrect_index| tojson }};
+    const correctUrlPath = {{ url_for("get_shopping_list") | tojson}};
     let addElementButton, newItem;
 
     document.addEventListener("DOMContentLoaded", () => {
         addElementButton = document.getElementById("add-item-button");
         newItem = document.getElementById("new-shopping-list-item");
 
+        if (isNew) {
+            addItem();
+        }
+        if (document.location.pathname !== correctUrlPath) {
+            history.replaceState(null, "", correctUrlPath);
+        }
+
         const itemForms = document.querySelectorAll(".shopping-list-item form");
-        for (const itemForm of itemForms) {
+        for (let i = 0; i < itemForms.length; i++) {
+            const itemForm = itemForms[i];
             new Autocompleter(
                 "{{ url_for('ingredient_completions') }}",
                 itemForm.querySelector('input[name="name"]'),
                 itemForm.querySelector("datalist"),
             );
+            if (i === incorrectIndex) {
+                const cancelButton =
+                    itemForm.querySelector(".cancel-edit-button");
+                cancelButton.onclick = () => location.reload(true);
+                toggle(itemForm, itemForm.previousElementSibling);
+            }
         }
     });
 

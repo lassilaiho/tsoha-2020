@@ -10,11 +10,25 @@ from app.ingredients.forms import RecipeIngredientForm
 
 
 def render_edit_form(save_action, cancel_action, form):
+    initial_values = []
+    for recipe_ingredient in form.ingredient_amounts:
+        initial_values.append({
+            "amount": recipe_ingredient.form.amount.data,
+            "amountErrors": recipe_ingredient.form.amount.errors,
+            "name": recipe_ingredient.form.name.data,
+            "nameErrors": recipe_ingredient.form.name.errors,
+        })
+    ingredient_data = {
+        "count": len(form.ingredient_amounts),
+        "initialValues": initial_values,
+    }
     return render_template(
         "recipes/edit.html",
         save_action=save_action,
         cancel_action=cancel_action,
         form=form,
+        ingredient_data=ingredient_data,
+        is_str=lambda x: isinstance(x, str),
     )
 
 
@@ -23,7 +37,11 @@ def render_edit_form(save_action, cancel_action, form):
 def get_recipes():
     form = GetRecipesForm(request.args)
     if not form.validate():
-        abort(400)
+        return render_template(
+            "recipes/index.html",
+            pagination=Recipe.query.filter_by(id=None).paginate(),
+            form=form,
+        )
     if form.q.data:
         filter = false()
         if not form.no_name.data:
@@ -180,8 +198,6 @@ def delete_recipe(recipe_id: int):
         account_id=current_user.id,
     ).delete()
     db.session().flush()
-    if delete_count == 0:
-        abort(404)
     Ingredient.delete_unused_ingredients(current_user.id)
     db.session().commit()
     return redirect(url_for("get_recipes"))

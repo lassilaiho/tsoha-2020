@@ -26,10 +26,12 @@
         <p class="col offset-3 text-danger">{{ error }}</p>
     </div>
     {% endif %}
-    {% for errors in form.errors.values() %}
-    {% for error in errors %}
+    {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+    {% for error in field_errors %}
     <div class="row">
-        <p class="col offset-3 text-danger">{{ error }}</p>
+        <p class="col offset-2 text-danger">
+            {{ form[field_name].label }}: {{ error }}
+        </p>
     </div>
     {% endfor %}
     {% endfor %}

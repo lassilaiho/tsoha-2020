@@ -12,10 +12,16 @@
     <div class="form-group">
         {{ form.description.label }}
         {{ form.description(id='description', rows='5', class='form-control') }}
+        {% for error in form.description.errors %}
+        <p class="text-danger">{{ error }}</p>
+        {% endfor %}
     </div>
     <div class="form-group">
         {{ form.steps.label }}
         {{ form.steps(id='steps', rows='5', class='form-control') }}
+        {% for error in form.steps.errors %}
+        <p class="text-danger">{{ error }}</p>
+        {% endfor %}
     </div>
     <div class="form-group">
         <div class="d-flex mb-2">
@@ -24,6 +30,13 @@
                 onclick="addIngredient()">
                 Add ingredient
             </button>
+        </div>
+        <div>
+            {% for error in form.ingredient_amounts.errors %}
+            {% if is_str(error) %}
+            <p class="text-danger">{{ error }}</p>
+            {% endif %}
+            {% endfor %}
         </div>
         <div id="ingredient-list"></div>
     </div>
@@ -38,51 +51,48 @@
     {{ form.csrf_token }}
 </form>
 <template id="ingredient-row-template">
-    <div class="form-inline mb-2">
-        <input class="form-control amount-input" type="text" value=""
-            placeholder="Amount">
-        <input class="form-control flex-grow-1 ml-2 name-input" required=""
-            type="text" value="" placeholder="Ingredient">
+    <div class="form-inline mb-2 align-items-start">
+        <div class="d-flex flex-column">
+            <input class="form-control amount-input" type="text" value=""
+                placeholder="Amount">
+            <div class="amount-error-display text-danger"></div>
+        </div>
+        <div class="d-flex flex-column flex-grow-1 mx-2">
+            <input class="form-control name-input" required="" type="text"
+                value="" placeholder="Ingredient">
+            <div class="name-error-display text-danger"></div>
+        </div>
         <datalist></datalist>
-        <button type="button" class="btn btn-danger ml-2"
+        <button type="button" class="btn btn-danger"
             onclick="removeIngredient(event)">
             Remove
         </button>
     </div>
 </template>
 <script>
-    let ingredientList;
+    let ingredientList, ingredientRowTemplate;
     const completers = [];
-    let ingredientRowTemplate;
-
-    const ingredients = JSON.parse(`{
-        "count": {{ form.ingredient_amounts.__len__()|tojson }},
-        "initialValues": [
-            {% for recipe_ingredient in form.ingredient_amounts %}
-            {
-                "amount": {{ recipe_ingredient.form.amount.data|tojson }},
-                "name": {{ recipe_ingredient.form.name.data|tojson }}
-            }
-            {% if not loop.last%},{% endif %}
-            {% endfor %}
-        ]
-    }`);
+    const ingredients = {{ ingredient_data| tojson }};
 
     document.addEventListener("DOMContentLoaded", () => {
         ingredientList = document.getElementById("ingredient-list");
         ingredientRowTemplate = document.getElementById("ingredient-row-template");
 
         for (let i = 0; i < ingredients.initialValues.length; i++) {
-            const { amount, name } = ingredients.initialValues[i];
-            const [row, completer] = createIngredientRow(i, amount, name);
+            const [row, completer] =
+                createIngredientRow(i, ingredients.initialValues[i]);
             ingredientList.append(row);
             completers.push(completer);
         }
     });
 
-
     function addIngredient() {
-        const [row, completer] = createIngredientRow(ingredients.count++, "", "");
+        const [row, completer] = createIngredientRow(ingredients.count++, {
+            "amount": "",
+            "amountErrors": [],
+            "name": "",
+            "nameErrors": [],
+        });
         ingredientList.append(row);
         completers.push(completer);
     }
@@ -110,17 +120,17 @@
         ingredients.count--;
     }
 
-    function createIngredientRow(index, amount, name) {
+    function createIngredientRow(index, data) {
         const row = ingredientRowTemplate.content.cloneNode(true);
         row.firstElementChild.dataset.index = index;
         const amountInput = row.querySelector(".amount-input");
         amountInput.id = `ingredient_amounts-${index}-amount`;
         amountInput.name = amountInput.id;
-        amountInput.value = amount;
+        amountInput.value = data.amount;
         const nameInput = row.querySelector(".name-input");
         nameInput.id = `ingredient_amounts-${index}-name`;
         nameInput.name = nameInput.id;
-        nameInput.value = name;
+        nameInput.value = data.name;
         const dataList = row.querySelector("datalist");
         dataList.id = `ingredient_amounts-${index}-datalist`;
         const completer = new Autocompleter(
@@ -128,7 +138,24 @@
             nameInput,
             dataList,
         );
+        displayErrors(
+            row.querySelector(".amount-error-display"),
+            data.amountErrors,
+        );
+        displayErrors(
+            row.querySelector(".name-error-display"),
+            data.nameErrors,
+        );
         return [row, completer];
+    }
+
+    function displayErrors(element, errors) {
+        for (let i = 0; i < errors.length; i++) {
+            if (i > 0) {
+                element.append(document.createElement("br"));
+            }
+            element.append(errors[i]);
+        }
     }
 </script>
 <script src="/static/js/autocomplete.js"></script>
