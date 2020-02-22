@@ -21,6 +21,8 @@ class GetRecipesForm(FlaskForm):
         self.no_steps.data = not self.no_steps.data
 
     class Meta:
+        # CSRF protection isn't needed because this form is only used in GET
+        # requests.
         csrf = False
 
 
