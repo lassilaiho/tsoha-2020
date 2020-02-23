@@ -131,3 +131,11 @@ def create_account():
     ))
     db.session().commit()
     return ""
+
+
+@app.route("/accounts/<int:account_id>", methods=["POST"])
+@login_required(required_role="admin")
+def delete_account(account_id):
+    Account.query.filter_by(id=account_id).delete()
+    db.session().commit()
+    return redirect(url_for("get_accounts"))
