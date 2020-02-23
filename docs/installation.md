@@ -1,10 +1,12 @@
 # Installation
-The project uses [Pipenv](https://pipenv.kennethreitz.org/en/latest/) for
-dependency management. Make sure it is installed before continuing.
+The app supports Python 3.6 and later versions.
+
+[Pipenv](https://pipenv.kennethreitz.org/en/latest/) is used for dependency
+management. Make sure it is installed before continuing.
 
 Clone the repository. Install dependencies by running
 ```
-pipenv install
+pipenv sync
 ```
 at the root of the repository. To start the app, run
 ```
@@ -13,12 +15,12 @@ pipenv run ./run.py
 
 ## Configuration
 The following settings can be configured:
-- debug_mode: true|false (default: false)
+- debug_mode: boolean (default: false)
   - Configures the app for development, enabling automatic restart on file
     changes, detailed error pages etc.
 - database_url: string (default: sqlite:///:memory:)
-  - Database connection URL. The app uses an in-memory SQLite database by
-    default.
+  - Database connection URL. The app supports PostgreSQL and SQLite databases.
+    By default an in-memory SQLite database is used.
 - port: integer (default: 5000)
   - The port the server binds to.
 
@@ -30,7 +32,7 @@ the app reads a YAML formatted configuration file from the path specified by the
 variable. Settings are specified at the top-level of the YAML document. Omitted
 settings are set to their default values.
 
-A sample configuration file:
+A sample configuration file
 ```yaml
 debug_mode: false
 database_url: sqlite:///recipe-book.db
@@ -47,15 +49,23 @@ take precedence over settings read from environment variables.
 ## Heroku
 The project includes a `Procfile` for use in Heroku. Configuration can be
 provided using environment variables as explained earlier. Set the environment
-variables as Heroku config vars. Remember to set `RECIPE_BOOK_CONFIG_ENV` to a
-non-empty value.
+variables as Heroku config vars.
 
 ### Deployment
-Make sure you have the Heroku CLI installed.
+Make sure you have the Heroku CLI installed and are logged in.
 
 Create a Heroku app by running
 ```
 heroku create <app name>
+```
+Add the PostgreSQL addon.
+```
+heroku addons:create heroku-postgresql
+```
+The configuration setting `database_url` is automatically set by the PostgreSQL
+addon. You may also want to change the port the app listens to. To do so, run
+```
+heroku config:set PORT=<port number>
 ```
 To deploy the current version of the application, run
 ```
