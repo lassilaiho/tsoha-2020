@@ -1,5 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, validators
+from wtforms import StringField, SelectField, PasswordField, validators
+
+from app.accounts.models import Account
 
 
 class LoginForm(FlaskForm):
@@ -27,3 +29,12 @@ class ChangePasswordForm(FlaskForm):
         [validators.equal_to(
             "new_password", "Passwords must match"), validators.length(max=100)],
     )
+
+
+class EditAccountForm(FlaskForm):
+    username = StringField(
+        "Username", [validators.data_required(), validators.length(max=100)])
+    role = SelectField(
+        "Role", choices=sorted(map(lambda x: (x, x), Account.valid_roles)))
+    password = PasswordField(
+        "Password", [validators.optional(), validators.length(max=100)])

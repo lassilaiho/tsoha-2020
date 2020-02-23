@@ -1,9 +1,11 @@
+import secrets
+
 from flask import render_template, redirect, url_for, request, jsonify
 from flask_login import login_user, logout_user, current_user
 
 from app.main import app, bcrypt, db, login_required
 from app.accounts.models import Account
-from app.accounts.forms import LoginForm, RegisterForm, ChangePasswordForm
+from app.accounts.forms import LoginForm, RegisterForm, ChangePasswordForm, EditAccountForm
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -100,7 +102,32 @@ def delete_my_account():
 @app.route("/accounts")
 @login_required(required_role="admin")
 def get_accounts():
+    form = EditAccountForm()
     return render_template(
         "accounts/accounts.html",
+        form=form,
         accounts=Account.query.all(),
     )
+
+
+@app.route("/accounts/new", methods=["POST"])
+@login_required(required_role="admin")
+def create_account():
+    form = EditAccountForm()
+    if not form.validate():
+        return jsonify(error_messages=form.errors), 400
+    if Account.query.filter_by(username=form.username.data).count() > 0:
+        return jsonify(error_messages={
+            "username": ["Username is already taken"],
+        }), 400
+    if form.password.data:
+        password = form.password.data
+    else:
+        password = secrets.token_urlsafe(64)
+    db.session().add(Account(
+        username=form.username.data,
+        role=form.role.data,
+        password_hash=bcrypt.generate_password_hash(password).decode("utf-8"),
+    ))
+    db.session().commit()
+    return ""

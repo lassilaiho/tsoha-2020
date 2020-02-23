@@ -11,6 +11,8 @@ class Account(db.Model):
     password_hash = db.Column(db.Text, nullable=False)
     role = db.Column(db.Text, nullable=False)
 
+    valid_roles = {"user", "admin"}
+
     recipes = db.relationship(
         "Recipe", backref="account", lazy=True,
         passive_deletes=True)

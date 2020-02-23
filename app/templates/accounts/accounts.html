@@ -9,6 +9,13 @@
                 <th>ID</th>
                 <th>Username</th>
                 <th>Role</th>
+                <th class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-success"
+                        data-toggle="modal" data-target="#edit-account-modal"
+                        data-account-id="new">
+                        Add account
+                    </button>
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -17,9 +24,109 @@
                 <td>{{ account.id }}</td>
                 <td>{{ account.username }}</td>
                 <td>{{ account.role }}</td>
+                <td></td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+<div class="modal fade" id="edit-account-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-account-form" onsubmit="sendEditForm(event)">
+                    <div id="username-group" class="form-group">
+                        {{ form.username.label }}
+                        {{ form.username(class="form-control")}}
+                        <p class="error-display text-danger"></p>
+                    </div>
+                    <div id="role-group" class="form-group">
+                        {{ form.role.label }}
+                        {{ form.role(class="form-control")}}
+                        <p class="error-display text-danger"></p>
+                    </div>
+                    <div id="password-group" class="form-group">
+                        {{ form.password.label }}
+                        {{ form.password(class="form-control")}}
+                        <small class="text-muted">
+                            Leave empty to keep unchanged
+                        </small>
+                        <p class="error-display text-danger"></p>
+                    </div>
+                    <p id="other-error-display"
+                        class="error-display text-danger"></p>
+                    {{ form.csrf_token }}
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" form="edit-account-form"
+                    class="btn btn-primary"></button>
+                <button type="button" class="btn btn-secondary"
+                    data-dismiss="modal">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const createAccountEndpoint = {{ url_for("create_account") | tojson }};
+
+    document.addEventListener("DOMContentLoaded", () => {
+        $("#edit-account-modal").on("show.bs.modal", function (event) {
+            const button = $(event.relatedTarget);
+            const accountId = button.data("account-id");
+            const modal = $(this).data("account-id", accountId);
+            if (accountId === "new") {
+                modal.find(".modal-title").text("Add account");
+                modal.find('button[type="submit"]')
+                    .text("Add");
+                modal.find("#username").val("");
+                modal.find("#role").val("");
+                modal.find("#password").val("");
+            }
+            modal.find(".error-display").empty();
+        });
+    });
+
+    function sendEditForm(e) {
+        e.preventDefault();
+        const form = e.target;
+        const jqForm = $(e.target);
+        const accountId = jqForm.data("account-id");
+        $.ajax({
+            url: createAccountEndpoint,
+            type: "POST",
+            data: {
+                username: form.elements.username.value,
+                role: form.elements.role.value,
+                password: form.elements.password.value,
+            },
+            success: () => document.location.reload(true),
+            error: (jqXHR, status, err) => {
+                if (status === "error" && err === "BAD REQUEST") {
+                    const errMsgs = jqXHR.responseJSON.error_messages;
+                    for (const msgField in errMsgs) {
+                        const errorDisplay = $(form).find(
+                            `#${msgField}-group .error-display`);
+                        errMsgs[msgField].forEach((msg, i) => {
+                            if (i > 0) {
+                                errorDisplay.append(document.createElement("br"));
+                            }
+                            errorDisplay.append(msg);
+                        });
+                    }
+                } else {
+                    $("#other-error-display").text("Something went wrong.");
+                }
+            },
+        });
+    }
+</script>
 {% endblock %}
