@@ -21,6 +21,9 @@ class Account(db.Model):
         "ShoppingListItem", backref="account", lazy=True,
         passive_deletes=True)
 
+    def is_admin(self):
+        return self.role == "admin"
+
     def get_id(self):
         return str(self.id)
 

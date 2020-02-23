@@ -64,7 +64,7 @@ def register():
 @login_required
 def my_account():
     return render_template(
-        "accounts/index.html",
+        "accounts/my-account.html",
         change_password_form=ChangePasswordForm(),
     )
 
@@ -95,3 +95,12 @@ def delete_my_account():
     logout_user()
     db.session().commit()
     return redirect(url_for("index"))
+
+
+@app.route("/accounts")
+@login_required(required_role="admin")
+def get_accounts():
+    return render_template(
+        "accounts/accounts.html",
+        accounts=Account.query.all(),
+    )

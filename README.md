@@ -21,7 +21,7 @@ to the shopping list, either manually or directly from the recipe view.
 
 Heroku app test accounts:
 
-username|password
---------|--------
-testikäyttäjä|salasana
-testikäyttäjä2|anasalas
+username|password|admin
+--------|--------|-----
+testikäyttäjä|salasana|❌
+testikäyttäjä2|anasalas|✅
