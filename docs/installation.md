@@ -46,12 +46,15 @@ are upper-case variants of the configuration variables. For example, to enable
 settings are set to their default values. Settings from a configuration file
 take precedence over settings read from environment variables.
 
-## Heroku
+## Deployment
+In addition to manually installing the app on a server by following the
+instructions above, you can deploy the app using Heroku or Docker.
+
+### Heroku
 The project includes a `Procfile` for use in Heroku. Configuration can be
 provided using environment variables as explained earlier. Set the environment
 variables as Heroku config vars.
 
-### Deployment
 Make sure you have the Heroku CLI installed and are logged in.
 
 Create a Heroku app by running
@@ -71,3 +74,11 @@ To deploy the current version of the application, run
 ```
 git push heroku master
 ```
+
+### Docker
+The app supports deployment using Docker. You can build an image using the
+Dockerfile provided in the repository, or use a pre-built image tagged
+`lassilaiho/recipe-book:latest` from Docker Hub. Configuration for the app can
+be provided using environment variables or by bind mounting a configuration file
+into the container and setting the environment variable `RECIPE_BOOK_CONFIG` to
+point to the mounted configuration file.
