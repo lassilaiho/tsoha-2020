@@ -18,7 +18,9 @@ Your shopping list is empty.
     {% for item in items %}
     <li class="list-group-item shopping-list-item">
         <div class="w-100 d-flex">
-            <span class="mr-auto">{{ item["amount"] }} {{ item["name"] }}</span>
+            <span class="mr-auto text-break">
+                {{- item["amount"] }} {{ item["name"] -}}
+            </span>
             <button type="button" class="btn btn-primary mr-2"
                 onclick="enableEdit(event)">
                 Edit

@@ -4,7 +4,9 @@
 
 {% block body %}
 <h1>My Account</h1>
-<p><strong>Username:</strong> {{ current_user.username }}</p>
+<p class="text-break">
+    <strong>Username:</strong> {{ current_user.username }}
+</p>
 <button type="button" class="btn btn-primary" data-toggle="modal"
     data-target="#password-change-modal">
     Change password

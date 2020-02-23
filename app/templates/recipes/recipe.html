@@ -3,26 +3,27 @@
 {% from "delete-modal.html" import delete_modal %}
 
 {% block body %}
-<h1>
+<h1 class="text-break">
     {% if recipe.name %}
     {{ recipe.name }}
     {% else %}
     Unnamed recipe
     {% endif %}
 </h1>
-<p>
-    {% if recipe.description %}
+<h2>Description</h2>
+<p class="text-display">
+    {%- if recipe.description -%}
     {{ recipe.description }}
-    {% else %}
+    {%- else -%}
     No description
-    {% endif %}
+    {%- endif -%}
 </p>
 <h2>Ingredients</h2>
 {% if recipe_ingredients %}
 <ol class="list-group">
     {% for recipe_ingredient in recipe_ingredients %}
     <li class="list-group-item d-flex justify-content-between">
-        <span>
+        <span class="text-break">
             {{ join_amount(
                 recipe_ingredient["amount"],
                 recipe_ingredient["amount_unit"],
@@ -36,7 +37,7 @@
             </button>
             <div class="dropdown-menu w-100">
                 {% for amount in recipe_ingredient["shopping_list_amounts"] %}
-                <span class="dropdown-item-text">{{ amount }}</span>
+                <span class="dropdown-item-text text-break">{{ amount }}</span>
                 {% endfor %}
                 <button type="button" class="dropdown-item"
                     data-ingredient-id="{{ recipe_ingredient['id'] }}"
@@ -58,12 +59,12 @@
 <p>No ingredients</p>
 {% endif %}
 <h2>Steps</h2>
-<p>
-    {% if recipe.steps %}
+<p class="text-display">
+    {%- if recipe.steps -%}
     {{ recipe.steps }}
-    {% else %}
+    {%- else -%}
     No steps
-    {% endif %}
+    {%- endif -%}
 </p>
 <div class="form-group d-flex justify-content-end">
     <a class="btn btn-primary mr-2"
