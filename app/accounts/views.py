@@ -133,6 +133,29 @@ def create_account():
     return ""
 
 
+@app.route("/accounts/<int:account_id>/update", methods=["POST"])
+@login_required(required_role="admin")
+def update_account(account_id):
+    form = EditAccountForm()
+    if not form.validate():
+        return jsonify(error_messages=form.errors), 400
+    account = Account.query.filter_by(id=account_id).first_or_404()
+    username_duplicate = \
+        Account.query.filter_by(username=form.username.data).first()
+    if username_duplicate and username_duplicate.id != account.id:
+        return jsonify(error_messages={
+            "username": ["Username is already taken"],
+        }), 400
+    account.username = form.username.data
+    account.role = form.role.data
+    if form.password.data:
+        account.password_hash = bcrypt.generate_password_hash(
+            form.password.data,
+        ).decode("utf-8")
+    db.session().commit()
+    return ""
+
+
 @app.route("/accounts/<int:account_id>", methods=["POST"])
 @login_required(required_role="admin")
 def delete_account(account_id):
