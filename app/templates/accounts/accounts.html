@@ -136,7 +136,6 @@
     function sendEditForm(e) {
         e.preventDefault();
         const form = e.target;
-        console.log(e.target);
         const jqForm = $(e.target);
         const accountId = jqForm.data("account-id");
         $.ajax({
@@ -151,6 +150,7 @@
             },
             success: () => document.location.reload(true),
             error: (jqXHR, status, err) => {
+                $(".error-display").empty();
                 if (status === "error" && err === "BAD REQUEST") {
                     const errMsgs = jqXHR.responseJSON.error_messages;
                     for (const msgField in errMsgs) {
