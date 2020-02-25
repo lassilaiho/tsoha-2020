@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, PasswordField, validators
+from wtforms import IntegerField, StringField, SelectField, PasswordField, validators
+from wtforms.fields.html5 import SearchField
 
 from app.accounts.models import Account
 
@@ -38,3 +39,16 @@ class EditAccountForm(FlaskForm):
         "Role", choices=sorted(map(lambda x: (x, x), Account.valid_roles)))
     password = PasswordField(
         "Password", [validators.optional(), validators.length(max=100)])
+
+
+class GetAccountsForm(FlaskForm):
+    query = SearchField("Search", [validators.length(
+        max=100,
+        message="Query can be at most %(max)d characters",
+    )], default="")
+    page = IntegerField("Page", default=1)
+
+    class Meta:
+        # CSRF protection isn't needed because this form is only used in GET
+        # requests.
+        csrf = False

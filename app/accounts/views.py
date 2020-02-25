@@ -2,10 +2,11 @@ import secrets
 
 from flask import render_template, redirect, url_for, request, jsonify
 from flask_login import login_user, logout_user, current_user
+from sqlalchemy.sql.expression import true
 
 from app.main import app, bcrypt, db, login_required
 from app.accounts.models import Account
-from app.accounts.forms import LoginForm, RegisterForm, ChangePasswordForm, EditAccountForm
+from app.accounts.forms import GetAccountsForm, LoginForm, RegisterForm, ChangePasswordForm, EditAccountForm
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -102,11 +103,30 @@ def delete_my_account():
 @app.route("/accounts")
 @login_required(required_role="admin")
 def get_accounts():
-    form = EditAccountForm()
+    get_form = GetAccountsForm(request.args)
+    if get_form.validate():
+        if get_form.query.data:
+            accounts = Account.query.filter(
+                Account.username.contains(
+                    get_form.query.data,
+                    autoescape=True,
+                ) | Account.role.contains(
+                    get_form.query.data,
+                    autoescape=True,
+                ),
+            )
+        else:
+            accounts = Account.query
+    else:
+        accounts = Account.query.filter_by(id=None)
     return render_template(
         "accounts/accounts.html",
-        form=form,
-        accounts=Account.query.all(),
+        get_form=get_form,
+        edit_form=EditAccountForm(None),
+        pagination=accounts.order_by(
+            Account.username,
+            Account.id,
+        ).paginate(get_form.page.data, 15),
     )
 
 

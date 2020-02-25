@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 
 {% from "delete-modal.html" import delete_modal %}
+{% from "pagination-controls.html" import pagination_controls %}
 
 {% block body %}
 <h1>Recipes</h1>
@@ -90,34 +91,7 @@
     {% endfor %}
 </div>
 {% endif %}
-<ul class="pagination justify-content-end mt-2">
-    <li class="page-item {{ '' if pagination.has_prev else 'disabled' }}">
-        <button type="submit" class="page-link" onclick="toPage(event)"
-            form="search-form" data-page="{{ pagination.prev_num }}">
-            Previous
-        </button>
-    </li>
-    {% for page in pagination.iter_pages() %}
-    {% if page %}
-    <li class="page-item {{ 'active' if page == pagination.page else '' }}">
-        <button type="submit" class="page-link" onclick="toPage(event)"
-            form="search-form" data-page="{{ page }}">
-            {{ page }}
-        </button>
-    </li>
-    {% else %}
-    <li class="page-item">
-        <a href="#" class="page-link">&hellip;</a>
-    </li>
-    {% endif %}
-    {% endfor %}
-    <li class="page-item {{ '' if pagination.has_next else 'disabled' }}">
-        <button type="submit" class="page-link" onclick="toPage(event)"
-            form="search-form" data-page="{{ pagination.next_num }}">
-            Next
-        </button>
-    </li>
-</ul>
+{{ pagination_controls(pagination, "search-form", "toPage") }}
 <form id="delete-recipe-form" method="POST">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 </form>
