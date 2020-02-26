@@ -14,7 +14,7 @@ def parse_amount(amount):
     match = amount_pattern.search(amount)
     if match:
         value = match.group("value").replace(",", ".")
-        return Decimal(clamp_amount(value)), match.group("unit").strip()
+        return Decimal(value), match.group("unit").strip()
     else:
         return Decimal(1), amount.strip()
 
