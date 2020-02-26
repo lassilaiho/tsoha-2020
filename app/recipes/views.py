@@ -59,7 +59,7 @@ def get_recipes():
     form.toggle_filters()
     return render_template(
         "recipes/index.html",
-        pagination=recipes.paginate(form.p.data, 10),
+        pagination=recipes.paginate(form.page_clamped(), 10),
         form=form,
     )
 

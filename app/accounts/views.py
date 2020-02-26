@@ -126,7 +126,7 @@ def get_accounts():
         pagination=accounts.order_by(
             Account.username,
             Account.id,
-        ).paginate(get_form.page.data, 15),
+        ).paginate(get_form.page_clamped(), 15),
     )
 
 

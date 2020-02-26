@@ -48,6 +48,9 @@ class GetAccountsForm(FlaskForm):
     )], default="")
     page = IntegerField("Page", default=1)
 
+    def page_clamped(self, min_value=1, max_value=9999999):
+        return max(min_value, min(self.page.data, max_value))
+
     class Meta:
         # CSRF protection isn't needed because this form is only used in GET
         # requests.

@@ -20,6 +20,9 @@ class GetRecipesForm(FlaskForm):
         self.no_description.data = not self.no_description.data
         self.no_steps.data = not self.no_steps.data
 
+    def page_clamped(self, min_value=1, max_value=9999999):
+        return max(min_value, min(self.p.data, max_value))
+
     class Meta:
         # CSRF protection isn't needed because this form is only used in GET
         # requests.
