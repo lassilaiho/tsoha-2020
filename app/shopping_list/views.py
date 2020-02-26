@@ -55,9 +55,11 @@ def get_shopping_list():
     return render_shopping_list()
 
 
-@app.route("/shopping-list/new", methods=["POST"])
+@app.route("/shopping-list/new", methods=["GET", "POST"])
 @login_required
 def create_shopping_list_item():
+    if request.method == "GET":
+        return redirect(url_for("get_shopping_list"))
     form = RecipeIngredientForm(request.form)
     if not form.validate():
         return render_shopping_list(form, "new")
@@ -71,9 +73,11 @@ def create_shopping_list_item():
     return redirect(url_for("get_shopping_list"))
 
 
-@app.route("/shopping-list/<int:item_id>", methods=["POST"])
+@app.route("/shopping-list/<int:item_id>", methods=["GET", "POST"])
 @login_required
 def update_shopping_list_item(item_id: int):
+    if request.method == "GET":
+        return redirect(url_for("get_shopping_list"))
     form = RecipeIngredientForm(request.form)
     if not form.validate():
         return render_shopping_list(form, item_id)
@@ -91,9 +95,11 @@ def update_shopping_list_item(item_id: int):
     return redirect(url_for("get_shopping_list"))
 
 
-@app.route("/shopping-list/add", methods=["POST"])
+@app.route("/shopping-list/add", methods=["GET", "POST"])
 @login_required
 def add_ingredient_to_shopping_list():
+    if request.method == "GET":
+        return redirect(url_for("get_shopping_list"))
     form = AddIngredientToShoppingListForm()
     if not form.validate():
         abort(400)
@@ -119,6 +125,8 @@ def add_ingredient_to_shopping_list():
 @app.route("/shopping-list/<int:item_id>/delete", methods=["POST"])
 @login_required
 def delete_shopping_list_item(item_id: int):
+    if request.method == "GET":
+        return redirect(url_for("get_shopping_list"))
     delete_count = ShoppingListItem.query.filter_by(
         id=item_id,
         account_id=current_user.id,

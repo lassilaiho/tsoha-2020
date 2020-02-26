@@ -190,9 +190,11 @@ def update_recipe(recipe_id: int):
     return redirect(url_for("get_recipe", recipe_id=recipe_id))
 
 
-@app.route("/recipes/<int:recipe_id>/delete", methods=["POST"])
+@app.route("/recipes/<int:recipe_id>/delete", methods=["GET", "POST"])
 @login_required
 def delete_recipe(recipe_id: int):
+    if request.method == "GET":
+        return redirect(url_for("get_recipe", recipe_id=recipe_id))
     delete_count = Recipe.query.filter_by(
         id=recipe_id,
         account_id=current_user.id,

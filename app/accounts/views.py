@@ -72,9 +72,11 @@ def my_account():
     )
 
 
-@app.route("/my-account/change-password", methods=["POST"])
+@app.route("/my-account/change-password", methods=["GET", "POST"])
 @login_required
 def change_password():
+    if request.method == "GET":
+        return redirect(url_for("my_account"))
     form = ChangePasswordForm()
     if not form.validate():
         return jsonify(error_messages=form.errors), 400
@@ -90,9 +92,11 @@ def change_password():
     return ""
 
 
-@app.route("/my-account/delete", methods=["POST"])
+@app.route("/my-account/delete", methods=["GET", "POST"])
 @login_required
 def delete_my_account():
+    if request.method == "GET":
+        return redirect(url_for("my_account"))
     db.session().delete(
         Account.query.filter_by(id=current_user.id).first_or_404())
     logout_user()
@@ -130,9 +134,11 @@ def get_accounts():
     )
 
 
-@app.route("/accounts/new", methods=["POST"])
+@app.route("/accounts/new", methods=["GET", "POST"])
 @login_required(required_role="admin")
 def create_account():
+    if request.method == "GET":
+        return redirect(url_for("get_accounts"))
     form = EditAccountForm()
     if not form.validate():
         return jsonify(error_messages=form.errors), 400
@@ -153,9 +159,11 @@ def create_account():
     return ""
 
 
-@app.route("/accounts/<int:account_id>/update", methods=["POST"])
+@app.route("/accounts/<int:account_id>/update", methods=["GET", "POST"])
 @login_required(required_role="admin")
 def update_account(account_id):
+    if request.method == "GET":
+        return redirect(url_for("get_accounts"))
     form = EditAccountForm()
     if not form.validate():
         return jsonify(error_messages=form.errors), 400
@@ -176,9 +184,11 @@ def update_account(account_id):
     return ""
 
 
-@app.route("/accounts/<int:account_id>", methods=["POST"])
+@app.route("/accounts/<int:account_id>", methods=["GET", "POST"])
 @login_required(required_role="admin")
 def delete_account(account_id):
+    if request.method == "GET":
+        return redirect(url_for("get_accounts"))
     Account.query.filter_by(id=account_id).delete()
     db.session().commit()
     return redirect(url_for("get_accounts"))
