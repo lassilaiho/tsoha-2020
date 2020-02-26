@@ -1,5 +1,6 @@
 from flask import render_template
 from flask_login import current_user
+from werkzeug.exceptions import HTTPException
 
 from app.main import app, login_required
 from app.accounts.models import Account
@@ -18,3 +19,10 @@ def index():
             account_id=current_user.id).count(),
         top_collectors=Account.get_top_recipe_collectors(5),
     )
+
+
+@app.errorhandler(HTTPException)
+def handle_404(error):
+    if error.code == 404:
+        return render_template("error-404.html")
+    return render_template("error-generic.html", error=error)
