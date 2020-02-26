@@ -3,15 +3,18 @@ from flask_login import current_user
 
 from app.main import app, login_required
 from app.accounts.models import Account
+from app.recipes.models import Recipe
+from app.shopping_list.models import ShoppingListItem
 
 
 @app.route("/")
 @login_required
 def index():
-    item_count, recipe_count = \
-        Account.get_item_and_recipe_counts(current_user.id)
     return render_template(
         "index.html",
-        item_count=item_count,
-        recipe_count=recipe_count,
+        item_count=ShoppingListItem.query.filter_by(
+            account_id=current_user.id).count(),
+        recipe_count=Recipe.query.filter_by(
+            account_id=current_user.id).count(),
+        top_collectors=Account.get_top_recipe_collectors(5),
     )

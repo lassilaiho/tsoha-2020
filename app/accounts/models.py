@@ -50,18 +50,17 @@ class Account(db.Model):
         return self.role == "admin" and role == "user"
 
     @staticmethod
-    def get_item_and_recipe_counts(account_id):
+    def get_top_recipe_collectors(count):
         stmt = text("""
-SELECT COUNT(DISTINCT items.id), COUNT(DISTINCT recipes.id)
+SELECT accounts.username username, COUNT(recipes.id) recipe_count
 FROM accounts
-LEFT JOIN shopping_list_items items ON items.account_id = accounts.id
 LEFT JOIN recipes ON recipes.account_id = accounts.id
-GROUP BY accounts.id
-HAVING accounts.id = :account_id;
-""").params(account_id=account_id)
+GROUP BY accounts.username
+ORDER BY COUNT(recipes.id) DESC, accounts.username
+LIMIT :count
+""").params(count=count)
         rows = db.session().execute(stmt)
         try:
-            row = rows.fetchone()
-            return row[0], row[1]
+            return rows.fetchall()
         finally:
             rows.close()

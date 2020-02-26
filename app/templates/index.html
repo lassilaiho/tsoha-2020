@@ -1,14 +1,41 @@
 {% extends "layout.html" %}
 
+{% macro plural(count) %}
+{%- if count != 1 -%}s{% endif -%}
+{% endmacro %}
+
 {% block body %}
 <ul>
     <li>
-        You have {{ recipe_count }} recipes in your
+        You have {{ recipe_count }} recipe{{ plural(recipe_count) }} in your
         <a href="{{ url_for('get_recipes') }}">recipe book</a>.
     </li>
     <li>
-        You have {{ item_count }} items in your
+        You have {{ item_count }} item{{ plural(item_count) }} in your
         <a href="{{ url_for('get_shopping_list') }}">shopping list</a>.
     </li>
 </ul>
+<div class="table-responsive">
+    <table class="table">
+        <caption style="caption-side: top;">
+            Top recipe collectors
+        </caption>
+        <thead class="thead-light">
+            <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Recipe count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for collector in top_collectors %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ collector["username"] }}</td>
+                <td>{{ collector["recipe_count"] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
