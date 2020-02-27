@@ -137,14 +137,14 @@ Your shopping list is empty.
         }
     });
 
-    function enableEdit(e) {
-        const p = e.target.parentNode;
-        toggle(p.nextElementSibling, p);
+    function enableEdit(event) {
+        const parent = event.target.parentNode;
+        toggle(parent.nextElementSibling, parent);
     }
 
-    function cancelEdit(e) {
-        const p = e.target.parentNode;
-        toggle(p.previousElementSibling, p);
+    function cancelEdit(event) {
+        const parent = event.target.parentNode;
+        toggle(parent.previousElementSibling, parent);
     }
 
     function toggle(show, hide) {

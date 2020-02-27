@@ -9,21 +9,18 @@ from app.ingredients.models import Ingredient
 @app.route("/ingredients/completions")
 @login_required
 def ingredient_completions():
-    q = request.args.get("q", "")
+    query = request.args.get("query", "")
     try:
-        count = int(request.args.get("c", "10"))
+        count = int(request.args.get("count", "10"))
         if count <= 0:
             raise ValueError()
     except ValueError:
-        return jsonify(error="Query parameter 'c' must be a natural number."), 400
+        return jsonify(error="Query parameter 'count' must be a natural number."), 400
     completions = db.session().execute(select(
         columns=[Ingredient.name],
         from_obj=Ingredient,
         whereclause=(Ingredient.account_id == current_user.id) &
-        Ingredient.name.contains(q),
+        Ingredient.name.contains(query),
         distinct=True,
     ).limit(count))
-    result = []
-    for x in completions:
-        result.append(x[0])
-    return jsonify(completions=result)
+    return jsonify(completions=[completion[0] for completion in completions])

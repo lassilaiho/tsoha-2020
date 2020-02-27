@@ -42,14 +42,15 @@ def get_recipes():
             pagination=Recipe.query.filter_by(id=None).paginate(),
             form=form,
         )
-    if form.q.data:
+    if form.query.data:
         filter = false()
         if not form.no_name.data:
-            filter |= Recipe.name.contains(form.q.data, autoescape=True)
+            filter |= Recipe.name.contains(form.query.data, autoescape=True)
         if not form.no_description.data:
-            filter |= Recipe.description.contains(form.q.data, autoescape=True)
+            filter |= Recipe.description.contains(
+                form.query.data, autoescape=True)
         if not form.no_steps.data:
-            filter |= Recipe.steps.contains(form.q.data, autoescape=True)
+            filter |= Recipe.steps.contains(form.query.data, autoescape=True)
         filter &= Recipe.account_id == current_user.id
         recipes = Recipe.query.filter(filter).order_by(Recipe.name)
     else:
@@ -64,21 +65,11 @@ def get_recipes():
     )
 
 
-@app.route("/recipes/new")
-@login_required
-def create_recipe_form():
-    return render_edit_form(
-        url_for("create_recipe"),
-        url_for("get_recipes"),
-        EditRecipeForm(),
-    )
-
-
-@app.route("/recipes/new", methods=["POST"])
+@app.route("/recipes/new", methods=["GET", "POST"])
 @login_required
 def create_recipe():
-    form = EditRecipeForm(request.form)
-    if not form.validate():
+    form = EditRecipeForm()
+    if request.method == "GET" or not form.validate():
         return render_edit_form(
             url_for("create_recipe"),
             url_for("get_recipes"),
@@ -106,23 +97,23 @@ def get_recipe(recipe_id: int):
     ).first_or_404()
     ingredients = []
     ingredients_by_id = {}
-    for i in recipe.get_ingredients():
-        ingredient = ingredients_by_id.get(i["id"])
-        if ingredient is None:
-            ingredient = {
-                "id": i["id"],
-                "name": i["name"],
-                "amount": i["amount"],
-                "amount_unit": i["amount_unit"],
+    for ingredient in recipe.get_ingredients():
+        existing_ingredient = ingredients_by_id.get(ingredient["id"])
+        if existing_ingredient is None:
+            existing_ingredient = {
+                "id": ingredient["id"],
+                "name": ingredient["name"],
+                "amount": ingredient["amount"],
+                "amount_unit": ingredient["amount_unit"],
                 "shopping_list_amounts": [],
             }
-            ingredients_by_id[i["id"]] = ingredient
+            ingredients_by_id[ingredient["id"]] = existing_ingredient
         ingredients.append({
-            "id": i["id"],
-            "name": i["name"],
-            "amount": i["amount"],
-            "amount_unit": i["amount_unit"],
-            "shopping_list_amounts": ingredient["shopping_list_amounts"],
+            "id": ingredient["id"],
+            "name": ingredient["name"],
+            "amount": ingredient["amount"],
+            "amount_unit": ingredient["amount_unit"],
+            "shopping_list_amounts": existing_ingredient["shopping_list_amounts"],
         })
     for x in recipe.get_shopping_list_amounts():
         ingredients_by_id[x["id"]]["shopping_list_amounts"].append(

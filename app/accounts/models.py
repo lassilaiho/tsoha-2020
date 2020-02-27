@@ -1,4 +1,4 @@
-from sqlalchemy.sql import text
+from sqlalchemy.sql import text, exists
 
 from app.main import db
 
@@ -64,3 +64,8 @@ LIMIT :count
             return rows.fetchall()
         finally:
             rows.close()
+
+    @staticmethod
+    def is_username_taken(username):
+        return db.session().query(
+            exists().where(Account.username == username)).scalar()

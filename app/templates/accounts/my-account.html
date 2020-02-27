@@ -88,9 +88,9 @@
         passwordChangeForm = document.getElementById("password-change-form");
     });
 
-    function changePassword(e) {
-        e.preventDefault();
-        const form = e.target;
+    function changePassword(event) {
+        event.preventDefault();
+        const form = event.target;
         $(form).find(".error-display").empty();
         $.ajax({
             url: form.action,

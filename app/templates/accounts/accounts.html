@@ -150,8 +150,8 @@
             modal.find(".error-display").empty();
         });
 
-        $("#delete-account-modal").on("show.bs.modal", function (e) {
-            const button = $(e.relatedTarget);
+        $("#delete-account-modal").on("show.bs.modal", function (event) {
+            const button = $(event.relatedTarget);
             const username = button.data("account-username");
             const bodyText =
                 `Are you sure you want to permanently delete account "${username}" and all data associated with it? This action is IRREVERSIBLE.`;
@@ -162,10 +162,10 @@
         });
     });
 
-    function sendEditForm(e) {
-        e.preventDefault();
-        const form = e.target;
-        const jqForm = $(e.target);
+    function sendEditForm(event) {
+        event.preventDefault();
+        const form = event.target;
+        const jqForm = $(event.target);
         const accountId = jqForm.data("account-id");
         $.ajax({
             url: accountId === "new"
@@ -203,8 +203,8 @@
         searchInput.value = "";
     }
 
-    function toPage(e) {
-        pageInput.value = e.target.dataset.page;
+    function toPage(event) {
+        pageInput.value = event.target.dataset.page;
     }
 </script>
 {% endblock %}

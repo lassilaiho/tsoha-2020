@@ -10,18 +10,18 @@ class Autocompleter {
         this.completionCount = 10;
     }
 
-    _complete(e) {
-        const s = e.target.value;
+    _complete(event) {
+        const queryString = event.target.value;
         if (this._currentRequest !== null) {
             this._currentRequest.abort();
         }
-        if (!s) {
+        if (!queryString) {
             this._currentRequest = null;
             return;
         }
         this._currentRequest = $.get(this._endpoint, {
-            q: s,
-            c: this.completionCount,
+            query: queryString,
+            count: this.completionCount,
         }, data => {
             this._currentRequest = null;
             const dataList = $(this.dataList).empty();

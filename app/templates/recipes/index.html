@@ -7,12 +7,11 @@
 <h1>Recipes</h1>
 <form id="search-form" class="form-inline flex-nowrap align-items-start"
     method="GET" action="{{ url_for('get_recipes') }}" onsubmit="onSearch()">
-    <a class="btn btn-success mr-auto"
-        href="{{ url_for('create_recipe_form') }}">
+    <a class="btn btn-success mr-auto" href="{{ url_for('create_recipe') }}">
         Add recipe
     </a>
-    {{ form.q(class="form-control mx-2", placeholder=form.q.label.text) }}
-    {{ form.p(class="d-none", value=1) }}
+    {{ form.query(class="form-control mx-2", placeholder=form.query.label.text) }}
+    {{ form.page(class="d-none", value=1) }}
     <button type="submit" class="btn btn-primary ml-2">
         Search
     </button>
@@ -39,7 +38,7 @@
             </div>
         </div>
     </div>
-    {% if form.q.data %}
+    {% if form.query.data %}
     <button type="submit" class="btn btn-secondary ml-2" onclick="showAll()">
         Show all
     </button>
@@ -47,7 +46,7 @@
 </form>
 {% if form.errors %}
 <p class="text-danger mt-2">
-    {% for error in form.q.errors %}
+    {% for error in form.query.errors %}
     {{ error }}
     {% if loop.nextitem %}<br />{% endif %}
     {% endfor %}
@@ -83,7 +82,7 @@
         </div>
     </div>
     {% else %}
-    {% if form.q.data %}
+    {% if form.query.data %}
     <p>No recipes matched the search criteria.</p>
     {% else %}
     <p>You have no recipes.</p>
@@ -118,13 +117,13 @@
 <script>
     let searchInput, pageInput, searchFilters;
     document.addEventListener("DOMContentLoaded", () => {
-        searchInput = document.getElementById("q");
-        pageInput = document.getElementById("p");
+        searchInput = document.getElementById("query");
+        pageInput = document.getElementById("page");
         searchFilters =
             document.querySelectorAll(".search-filters input[type=checkbox]");
 
-        $("#delete-modal").on("show.bs.modal", function (e) {
-            const button = $(e.relatedTarget);
+        $("#delete-modal").on("show.bs.modal", function (event) {
+            const button = $(event.relatedTarget);
             const name = button.data("recipe-name");
             const bodyText =
                 `Are you sure you want to permanently delete ${name}?`;
@@ -148,12 +147,12 @@
         }
     }
 
-    function toPage(e) {
-        pageInput.value = e.target.dataset.page;
+    function toPage(event) {
+        pageInput.value = event.target.dataset.page;
     }
 
-    function stopPropagation(e) {
-        e.stopPropagation();
+    function stopPropagation(event) {
+        event.stopPropagation();
     }
 </script>
 {% endblock %}

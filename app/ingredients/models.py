@@ -40,17 +40,17 @@ WHERE ingredients.id IN (
 
     @staticmethod
     def insert_if_missing(name, account_id):
-        x = Ingredient.query.filter(
+        ingredient = Ingredient.query.filter(
             Ingredient.account_id == account_id,
             func.lower(Ingredient.name) == func.lower(name),
         ).first()
-        if x:
-            return x
-        x = Ingredient(name)
-        x.account_id = account_id
-        db.session().add(x)
+        if ingredient:
+            return ingredient
+        ingredient = Ingredient(name)
+        ingredient.account_id = account_id
+        db.session().add(ingredient)
         db.session().flush()
-        return x
+        return ingredient
 
 
 idx_ingredient_account_id_name_lower = db.Index(

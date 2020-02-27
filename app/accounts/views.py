@@ -44,7 +44,7 @@ def register():
     form = RegisterForm(request.form)
     if not form.validate():
         return render_template("accounts/register.html", form=form)
-    if Account.query.filter_by(username=form.username.data).count() > 0:
+    if Account.is_username_taken(form.username.data):
         return render_template(
             "accounts/register.html",
             form=form,
@@ -142,7 +142,7 @@ def create_account():
     form = EditAccountForm()
     if not form.validate():
         return jsonify(error_messages=form.errors), 400
-    if Account.query.filter_by(username=form.username.data).count() > 0:
+    if Account.is_username_taken(form.username.data):
         return jsonify(error_messages={
             "username": ["Username is already taken"],
         }), 400

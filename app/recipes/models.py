@@ -66,28 +66,28 @@ GROUP BY i.id, sli.amount_unit
         for recipe_ingredient_form in form.ingredient_amounts:
             name = recipe_ingredient_form.data["name"].strip()
             lower_name = name.lower()
-            x = ingredients_by_name.get(lower_name)
-            if not x:
-                x = Ingredient.query.filter(
+            existing_ingredient = ingredients_by_name.get(lower_name)
+            if not existing_ingredient:
+                existing_ingredient = Ingredient.query.filter(
                     Ingredient.account_id == self.account_id,
                     func.lower(Ingredient.name) == lower_name,
                 ).first()
-                if not x:
-                    x = Ingredient(name)
-                    x.account_id = self.account_id
-                    missing_ingredients.append(x)
-                ingredients_by_name[lower_name] = x
-            ingredients.append(x)
+                if not existing_ingredient:
+                    existing_ingredient = Ingredient(name)
+                    existing_ingredient.account_id = self.account_id
+                    missing_ingredients.append(existing_ingredient)
+                ingredients_by_name[lower_name] = existing_ingredient
+            ingredients.append(existing_ingredient)
         db.session().bulk_save_objects(missing_ingredients, return_defaults=True)
         db.session().flush()
 
         recipe_ingredients = []
-        for i, recipe_ingredient_form in enumerate(form.ingredient_amounts):
+        for index, recipe_ingredient_form in enumerate(form.ingredient_amounts):
             amount, unit = recipe_ingredient_form.parse_amount()
             recipe_ingredients.append(RecipeIngredient(
                 amount=amount,
                 amount_unit=unit,
-                ingredient_id=ingredients[i].id,
+                ingredient_id=ingredients[index].id,
                 recipe_id=self.id,
             ))
         db.session().bulk_save_objects(recipe_ingredients)
