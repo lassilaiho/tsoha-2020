@@ -6,7 +6,6 @@ yaml = YAML(typ="safe")
 
 
 class DefaultConfig:
-    SQLALCHEMY_ECHO = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     PORT = 5000
