@@ -1,5 +1,5 @@
 *
-!/app
+!app
 *.db
 !Pipfile*
-!/run.py
+!run.py

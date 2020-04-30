@@ -5,5 +5,5 @@ RUN apt-get update && apt-get install -y libpq-dev gcc \
 COPY Pipfile Pipfile.lock ./
 RUN pipenv install --deploy --system --ignore-pipfile
 EXPOSE 5000
-CMD python3 ./run.py
-COPY . .
+COPY . ./
+CMD [ "python3", "/app/run.py" ]
