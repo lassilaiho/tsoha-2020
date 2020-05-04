@@ -1,6 +1,6 @@
 import secrets
 
-from flask import render_template, redirect, url_for, request, jsonify
+from flask import render_template, redirect, url_for, request, jsonify, abort
 from flask_login import login_user, logout_user, current_user
 from sqlalchemy.sql.expression import true
 
@@ -39,6 +39,8 @@ def logout():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if not app.config["ALLOW_REGISTER"]:
+        abort(404)
     if request.method == "GET":
         return render_template("accounts/register.html", form=RegisterForm())
     form = RegisterForm(request.form)

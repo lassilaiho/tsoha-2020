@@ -56,10 +56,12 @@
                     <a class="nav-item nav-link" href="{{ url_for('login') }}">
                         Login
                     </a>
+                    {% if config["ALLOW_REGISTER"] %}
                     <a class="nav-item nav-link"
                         href="{{ url_for('register') }}">
                         Register
                     </a>
+                    {% endif %}
                     {% endif %}
                 </div>
             </div>

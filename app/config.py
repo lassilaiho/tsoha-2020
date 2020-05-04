@@ -9,6 +9,7 @@ class DefaultConfig:
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     PORT = 5000
+    ALLOW_REGISTER = True
 
 
 def dict_to_config(config_dict):
@@ -23,6 +24,9 @@ def dict_to_config(config_dict):
     x = config_dict.get("port")
     if x:
         config["PORT"] = int(x)
+    x = str(config_dict.get("allow_register", ""))
+    if x.lower() == "false":
+        config["ALLOW_REGISTER"] = False
     return config
 
 
@@ -31,6 +35,7 @@ def from_env():
         "debug_mode": os.environ.get("DEBUG_MODE"),
         "database_url": os.environ.get("DATABASE_URL"),
         "port": os.environ.get("PORT"),
+        "allow_register": os.environ.get("ALLOW_REGISTER"),
     }
 
 
