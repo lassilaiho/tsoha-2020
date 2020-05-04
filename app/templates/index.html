@@ -15,6 +15,7 @@
         <a href="{{ url_for('get_shopping_list') }}">shopping list</a>.
     </li>
 </ul>
+{% if config["SHOW_TOP_COLLECTORS"] %}
 <div class="table-responsive">
     <table class="table">
         <caption style="caption-side: top;">
@@ -38,4 +39,5 @@
         </tbody>
     </table>
 </div>
+{% endif %}
 {% endblock %}

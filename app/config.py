@@ -10,6 +10,7 @@ class DefaultConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     PORT = 5000
     ALLOW_REGISTER = True
+    SHOW_TOP_COLLECTORS = True
 
 
 def dict_to_config(config_dict):
@@ -27,6 +28,9 @@ def dict_to_config(config_dict):
     x = str(config_dict.get("allow_register", ""))
     if x.lower() == "false":
         config["ALLOW_REGISTER"] = False
+    x = str(config_dict.get("show_top_collectors", ""))
+    if x.lower() == "false":
+        config["SHOW_TOP_COLLECTORS"] = False
     return config
 
 
@@ -36,6 +40,7 @@ def from_env():
         "database_url": os.environ.get("DATABASE_URL"),
         "port": os.environ.get("PORT"),
         "allow_register": os.environ.get("ALLOW_REGISTER"),
+        "show_top_collectors": os.environ.get("SHOW_TOP_COLLECTORS"),
     }
 
 

@@ -11,13 +11,17 @@ from app.shopping_list.models import ShoppingListItem
 @app.route("/")
 @login_required
 def index():
+    if app.config["SHOW_TOP_COLLECTORS"]:
+        top_collectors = Account.get_top_recipe_collectors(5)
+    else:
+        top_collectors = None
     return render_template(
         "index.html",
         item_count=ShoppingListItem.query.filter_by(
             account_id=current_user.id).count(),
         recipe_count=Recipe.query.filter_by(
             account_id=current_user.id).count(),
-        top_collectors=Account.get_top_recipe_collectors(5),
+        top_collectors=top_collectors,
     )
 
 
