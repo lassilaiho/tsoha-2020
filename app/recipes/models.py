@@ -33,6 +33,7 @@ WHERE
     ri.recipe_id = :recipe_id
     AND i.account_id = :account_id
     AND ri.ingredient_id = i.id
+ORDER BY ri.id
 """).bindparams(recipe_id=self.id, account_id=self.account_id)
         return db.session().execute(stmt)
 

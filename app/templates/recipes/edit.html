@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block body %}
-<form method="POST" action="{{ save_action }}">
+<form method="POST" action="{{ save_action }}" onsubmit="onSubmit(event)">
     <div class="form-group">
         {{ form.name.label }}
         {{ form.name(id='name', class='form-control') }}
@@ -17,19 +17,8 @@
         {% endfor %}
     </div>
     <div class="form-group">
-        {{ form.steps.label }}
-        {{ form.steps(id='steps', rows='5', class='form-control') }}
-        {% for error in form.steps.errors %}
-        <p class="text-danger">{{ error }}</p>
-        {% endfor %}
-    </div>
-    <div class="form-group">
         <div class="d-flex mb-2">
             <span class="mr-auto">Ingredients</span>
-            <button type="button" class="btn btn-success"
-                onclick="addIngredient()">
-                Add ingredient
-            </button>
         </div>
         <div>
             {% for error in form.ingredient_amounts.errors %}
@@ -39,6 +28,19 @@
             {% endfor %}
         </div>
         <div id="ingredient-list"></div>
+        <div class="d-flex mb-2 justify-content-end">
+            <button type="button" class="btn btn-success"
+                onclick="addIngredient()">
+                Add ingredient
+            </button>
+        </div>
+    </div>
+    <div class="form-group">
+        {{ form.steps.label }}
+        {{ form.steps(id='steps', rows='5', class='form-control') }}
+        {% for error in form.steps.errors %}
+        <p class="text-danger">{{ error }}</p>
+        {% endfor %}
     </div>
     <div class="form-group d-flex justify-content-end">
         <button class="btn btn-primary mr-2" type="submit">
@@ -51,7 +53,9 @@
     {{ form.csrf_token }}
 </form>
 <template id="ingredient-row-template">
-    <div class="form-inline mb-2 align-items-start">
+    <div class="form-inline pb-2 align-items-start">
+        <img src="/static/img/vertical-dots.svg" alt="" width="32" height="32"
+            title="Reorder" draggable="false" class="handle">
         <div class="d-flex flex-column">
             <input class="form-control amount-input" type="text" value=""
                 placeholder="Amount">
@@ -69,70 +73,56 @@
         </button>
     </div>
 </template>
+<style>
+    .handle {
+        cursor: grab;
+    }
+</style>
 <script>
     let ingredientList, ingredientRowTemplate;
-    const completers = [];
+    let idCounter = 0;
+    const completers = new Map();
     const ingredients = {{ ingredient_data| tojson }};
 
     document.addEventListener("DOMContentLoaded", () => {
-        ingredientList = document.getElementById("ingredient-list");
+        ingredientList = new SortableList(document.getElementById("ingredient-list"));
         ingredientRowTemplate = document.getElementById("ingredient-row-template");
 
-        for (let i = 0; i < ingredients.initialValues.length; i++) {
-            const [row, completer] =
-                createIngredientRow(i, ingredients.initialValues[i]);
-            ingredientList.append(row);
-            completers.push(completer);
-        }
+        ingredients.initialValues.forEach(addIngredient);
     });
 
-    function addIngredient() {
-        const [row, completer] = createIngredientRow(ingredients.count++, {
-            "amount": "",
-            "amountErrors": [],
-            "name": "",
-            "nameErrors": [],
-        });
-        ingredientList.append(row);
-        completers.push(completer);
+    function addIngredient(value) {
+        if (value === undefined) {
+            value = {
+                "amount": "",
+                "amountErrors": [],
+                "name": "",
+                "nameErrors": [],
+            };
+        }
+        const id = idCounter++;
+        const [row, completer] = createIngredientRow(id, value);
+        ingredientList.list.append(row);
+        completers.set(id, completer);
     }
 
     function removeIngredient(event) {
         const row = event.target.parentNode;
-        const index = parseInt(row.dataset.index);
-        let next = row.nextElementSibling;
-        while (next) {
-            const newIndex = parseInt(next.dataset.index) - 1;
-            next.dataset.index = newIndex;
-            const amountInput = next.querySelector(".amount-input");
-            amountInput.id = `ingredient_amounts-${newIndex}-amount`;
-            amountInput.name = amountInput.id;
-            const nameInput = next.querySelector(".name-input");
-            nameInput.id = `ingredient_amounts-${newIndex}-name`;
-            nameInput.name = nameInput.id;
-            const dataList = next.querySelector("datalist");
-            dataList.id = `ingredient_amounts-${newIndex}-datalist`;
-            nameInput.setAttribute("list", dataList.id);
-            next = next.nextElementSibling;
-        }
+        const id = parseInt(row.dataset.id);
         row.remove();
-        completers.splice(index, 1)[0].dispose();
-        ingredients.count--;
+        completers.get(id).dispose();
+        completers.delete(id);
     }
 
-    function createIngredientRow(index, data) {
+    function createIngredientRow(id, data) {
         const row = ingredientRowTemplate.content.cloneNode(true);
-        row.firstElementChild.dataset.index = index;
-        const amountInput = row.querySelector(".amount-input");
-        amountInput.id = `ingredient_amounts-${index}-amount`;
-        amountInput.name = amountInput.id;
-        amountInput.value = data.amount;
+        row.firstElementChild.dataset.id = id;
+        row.firstElementChild.id = `ingredient-${id}`;
+        row.querySelector(".amount-input").value = data.amount;
         const nameInput = row.querySelector(".name-input");
-        nameInput.id = `ingredient_amounts-${index}-name`;
-        nameInput.name = nameInput.id;
         nameInput.value = data.name;
         const dataList = row.querySelector("datalist");
-        dataList.id = `ingredient_amounts-${index}-datalist`;
+        dataList.id = `datalist-${id}`;
         const completer = new Autocompleter(
             "{{ url_for('ingredient_completions') }}",
             nameInput,
@@ -157,6 +147,68 @@
             element.append(errors[i]);
         }
     }
+
+    function onSubmit(event) {
+        const amounts = event.target.querySelectorAll(".amount-input");
+        const names = event.target.querySelectorAll(".name-input");
+        for (let i = 0; i < amounts.length; i++) {
+            amounts[i].name = `ingredient_amounts-${i}-amount`;
+            names[i].name = `ingredient_amounts-${i}-name`;
+        }
+    }
+
+    class SortableList {
+        constructor(list) {
+            this.list = list;
+            list.childNodes.forEach(this.makeDraggable, this);
+            this.observer = new MutationObserver(this.onChange.bind(this));
+            this.observer.observe(list, { childList: true });
+        }
+
+        dispose() {
+            this.observer.disconnect();
+        }
+
+        onChange(records) {
+            for (const record of records) {
+                for (const node of record.addedNodes) {
+                    this.makeDraggable(node);
+                }
+            }
+        }
+
+        makeDraggable(item) {
+            item.draggable = true;
+            item.addEventListener("dragstart", event => {
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData(item.id, "");
+                setTimeout(() => item.style.visibility = "hidden", 0);
+            });
+            item.addEventListener("dragend", event => {
+                const item = event.target;
+                item.style.visibility = "visible";
+            });
+            item.addEventListener("dragenter", e => e.preventDefault());
+            item.addEventListener("dragover", event => {
+                event.preventDefault();
+                const draggedId = event.dataTransfer.types[0];
+                const rect = item.getBoundingClientRect();
+                if (event.clientY - rect.top < rect.height / 2) {
+                    if (item.previousElementSibling?.id !== draggedId) {
+                        const draggedItem = document.getElementById(draggedId);
+                        this.list.insertBefore(draggedItem, item);
+                    }
+                } else {
+                    const next = item.nextElementSibling;
+                    if (next?.id !== draggedId) {
+                        const draggedItem = document.getElementById(draggedId);
+                        this.list.insertBefore(draggedItem, next);
+                    }
+                }
+            });
+        }
+    }
+
 </script>
 <script src="/static/js/autocomplete.js"></script>
 {% endblock %}

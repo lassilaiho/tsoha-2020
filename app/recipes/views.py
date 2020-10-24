@@ -18,10 +18,7 @@ def render_edit_form(save_action, cancel_action, form):
             "name": recipe_ingredient.form.name.data,
             "nameErrors": recipe_ingredient.form.name.errors,
         })
-    ingredient_data = {
-        "count": len(form.ingredient_amounts),
-        "initialValues": initial_values,
-    }
+    ingredient_data = {"initialValues": initial_values}
     return render_template(
         "recipes/edit.html",
         save_action=save_action,
