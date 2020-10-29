@@ -28,7 +28,10 @@ def login():
             error="Invalid username or password",
         )
     login_user(account)
-    return redirect(url_for("index"))
+    next = request.args.get("next", "")
+    if next == "":
+        return redirect(url_for("index"))
+    return redirect(next)
 
 
 @app.route("/logout")
