@@ -9,22 +9,35 @@ from app.ingredients.models import Ingredient, RecipeIngredient
 from app.ingredients.forms import RecipeIngredientForm
 
 
-def render_edit_form(save_action, cancel_action, form):
+def render_edit_form(save_action: str, cancel_action: str, form: EditRecipeForm):
     initial_values = []
+    groups = {}
     for recipe_ingredient in form.ingredient_amounts:
-        initial_values.append({
+        group = groups.get(recipe_ingredient.form.group.data)
+        if group is None:
+            group = {
+                "name": recipe_ingredient.form.group.data,
+                "errors": set(),
+                "ingredients": [],
+            }
+            groups[recipe_ingredient.form.group.data] = group
+            initial_values.append(group)
+        for error in recipe_ingredient.form.group.errors:
+            group["errors"].add(error)
+        group["ingredients"].append({
             "amount": recipe_ingredient.form.amount.data,
             "amountErrors": recipe_ingredient.form.amount.errors,
             "name": recipe_ingredient.form.name.data,
             "nameErrors": recipe_ingredient.form.name.errors,
         })
-    ingredient_data = {"initialValues": initial_values}
+    for group in initial_values:
+        group["errors"] = list(group["errors"])
     return render_template(
         "recipes/edit.html",
         save_action=save_action,
         cancel_action=cancel_action,
         form=form,
-        ingredient_data=ingredient_data,
+        ingredient_data=initial_values,
         is_str=lambda x: isinstance(x, str),
     )
 
@@ -92,26 +105,31 @@ def get_recipe(recipe_id: int):
         id=recipe_id,
         account_id=current_user.id,
     ).first_or_404()
-    ingredients = []
+    groups = []
+    groups_by_id = {}
     ingredients_by_id = {}
     for ingredient in recipe.get_ingredients():
-        existing_ingredient = ingredients_by_id.get(ingredient["id"])
-        if existing_ingredient is None:
-            existing_ingredient = {
-                "id": ingredient["id"],
-                "name": ingredient["name"],
-                "amount": ingredient["amount"],
-                "amount_unit": ingredient["amount_unit"],
-                "shopping_list_amounts": [],
-            }
-            ingredients_by_id[ingredient["id"]] = existing_ingredient
-        ingredients.append({
+        group = groups_by_id.get(ingredient["group_name"])
+        if group is None:
+            group = []
+            groups_by_id[ingredient["group_name"]] = group
+            groups.append({
+                "name": ingredient["group_name"],
+                "ingredients": group,
+            })
+        values = {
             "id": ingredient["id"],
             "name": ingredient["name"],
-            "amount": ingredient["amount"],
-            "amount_unit": ingredient["amount_unit"],
-            "shopping_list_amounts": existing_ingredient["shopping_list_amounts"],
-        })
+            "amount": RecipeIngredientForm.join_amount(
+                ingredient["amount"],
+                ingredient["amount_unit"],
+            ),
+            "shopping_list_amounts": [],
+        }
+        existing_ingredient = ingredients_by_id.setdefault(
+            ingredient["id"], values)
+        values["shopping_list_amounts"] = existing_ingredient["shopping_list_amounts"]
+        group.append(values)
     for x in recipe.get_shopping_list_amounts():
         ingredients_by_id[x["id"]]["shopping_list_amounts"].append(
             RecipeIngredientForm.join_amount(
@@ -122,8 +140,7 @@ def get_recipe(recipe_id: int):
     return render_template(
         "recipes/recipe.html",
         recipe=recipe,
-        recipe_ingredients=ingredients,
-        join_amount=RecipeIngredientForm.join_amount,
+        groups=groups,
     )
 
 
@@ -145,6 +162,7 @@ def edit_recipe(recipe_id: int):
                 recipe_ingredient["amount"],
                 recipe_ingredient["amount_unit"],
             ),
+            "group": recipe_ingredient["group_name"],
         })
     return render_edit_form(
         url_for("update_recipe", recipe_id=recipe_id),
@@ -183,7 +201,7 @@ def update_recipe(recipe_id: int):
 def delete_recipe(recipe_id: int):
     if request.method == "GET":
         return redirect(url_for("get_recipe", recipe_id=recipe_id))
-    delete_count = Recipe.query.filter_by(
+    Recipe.query.filter_by(
         id=recipe_id,
         account_id=current_user.id,
     ).delete()

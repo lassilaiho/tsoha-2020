@@ -27,7 +27,12 @@ class Recipe(db.Model):
 
     def get_ingredients(self):
         stmt = text("""
-SELECT ri.amount AS amount, ri.amount_unit AS amount_unit, i.id AS id, i.name AS name
+SELECT
+    ri.amount AS amount,
+    ri.amount_unit AS amount_unit,
+    ri.group_name AS group_name,
+    i.id AS id,
+    i.name AS name
 FROM ingredients i, recipe_ingredient ri
 WHERE
     ri.recipe_id = :recipe_id
@@ -90,6 +95,7 @@ GROUP BY i.id, sli.amount_unit
                 amount_unit=unit,
                 ingredient_id=ingredients[index].id,
                 recipe_id=self.id,
+                group_name=recipe_ingredient_form.group.data,
             ))
         db.session().bulk_save_objects(recipe_ingredients)
         db.session().flush()

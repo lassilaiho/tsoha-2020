@@ -74,3 +74,4 @@ class RecipeIngredient(db.Model):
         "recipes.id",
         ondelete="CASCADE",
     ), nullable=False, index=True)
+    group_name = db.Column(db.Text, nullable=False)

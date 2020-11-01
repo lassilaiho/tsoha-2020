@@ -36,6 +36,10 @@ class GetRecipesForm(FlaskForm):
         csrf = False
 
 
+class GroupedRecipeIngredientForm(RecipeIngredientForm):
+    group = StringField("Group", [validators.length(max=5000)], default="")
+
+
 class EditRecipeForm(FlaskForm):
     name = StringField("Name", [
         validators.data_required("Name must not be empty"),
@@ -45,7 +49,7 @@ class EditRecipeForm(FlaskForm):
         "Description", [validators.length(max=5000)], default="")
     steps = TextAreaField("Steps", [validators.length(max=5000)], default="")
     ingredient_amounts = FieldList(
-        FormField(RecipeIngredientForm),
+        FormField(GroupedRecipeIngredientForm),
         validators=[validators.length(
             max=100,
             message="Recipe can have at most %(max)d ingredients.",
