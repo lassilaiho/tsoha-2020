@@ -5,39 +5,46 @@
 
 {% block body %}
 <h1>Recipes</h1>
-<form id="search-form" class="form-inline flex-nowrap align-items-start"
-    method="GET" action="{{ url_for('get_recipes') }}" onsubmit="onSearch()">
-    <a class="btn btn-success mr-auto" href="{{ url_for('create_recipe') }}">
+<form id="search-form" class="form-inline align-items-start" method="GET"
+    action="{{ url_for('get_recipes') }}" onsubmit="onSearch()">
+    <a class="btn btn-success mb-2 d-none d-sm-inline"
+        href="{{ url_for('create_recipe') }}">
         Add recipe
     </a>
-    {{ form.query(class="form-control mx-2", placeholder=form.query.label.text) }}
+    {{ form.query(class="form-control ml-auto mb-2 mr-2", placeholder=form.query.label.text) }}
     {{ form.page(class="d-none", value=1) }}
-    <button type="submit" class="btn btn-primary ml-2">
-        Search
-    </button>
-    <div class="dropdown ml-2">
-        <button class="btn btn-secondary dropdown-toggle" type="button"
-            data-toggle="dropdown">
-            Filters
+    <a class="btn btn-success mb-2 d-sm-none"
+        href="{{ url_for('create_recipe') }}">
+        Add recipe
+    </a>
+    <span class="d-flex flex-nowrap ml-auto ml-md-0 mr-2">
+        <button type="submit" class="btn btn-primary mr-2">
+            Search
         </button>
-        <div class="dropdown-menu p-2 search-filters"
-            onclick="stopPropagation(event)">
-            <div class="d-flex flex-column align-items-start">
-                <div class="form-check">
-                    {{ form.no_name(class="form-check-input") }}
-                    {{ form.no_name.label }}
-                </div>
-                <div class="form-check">
-                    {{ form.no_description(class="form-check-input") }}
-                    {{ form.no_description.label }}
-                </div>
-                <div class="form-check">
-                    {{ form.no_steps(class="form-check-input") }}
-                    {{ form.no_steps.label }}
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button"
+                data-toggle="dropdown">
+                Filters
+            </button>
+            <div class="dropdown-menu dropdown-menu-right p-2 search-filters"
+                onclick="stopPropagation(event)">
+                <div class="d-flex flex-column align-items-start">
+                    <div class="form-check">
+                        {{ form.no_name(class="form-check-input") }}
+                        {{ form.no_name.label(class="w-100") }}
+                    </div>
+                    <div class="form-check">
+                        {{ form.no_description(class="form-check-input") }}
+                        {{ form.no_description.label(class="w-100") }}
+                    </div>
+                    <div class="form-check">
+                        {{ form.no_steps(class="form-check-input") }}
+                        {{ form.no_steps.label(class="w-100") }}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </span>
     {% if form.query.data %}
     <button type="submit" class="btn btn-secondary ml-2" onclick="showAll()">
         Show all
