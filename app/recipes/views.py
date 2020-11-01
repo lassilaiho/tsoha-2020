@@ -141,6 +141,7 @@ def get_recipe(recipe_id: int):
         "recipes/recipe.html",
         recipe=recipe,
         groups=groups,
+        prev_page=request.headers.get("Referer", url_for("get_recipes")),
     )
 
 

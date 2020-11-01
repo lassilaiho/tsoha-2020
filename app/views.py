@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import Response, render_template, send_file
 from flask_login import current_user
 from werkzeug.exceptions import HTTPException
 
@@ -23,6 +23,46 @@ def index():
             account_id=current_user.id).count(),
         top_collectors=top_collectors,
     )
+
+
+@app.route("/manifest.json")
+def app_manifest():
+    return Response("""{
+        "name": "Recipe Book",
+        "icons": [
+            {
+                "src": "/static/img/icon-192.png",
+                "type": "image/png",
+                "sizes": "192x192"
+            },
+            {
+                "src": "/static/img/icon-512.png",
+                "type": "image/png",
+                "sizes": "512x512"
+            }
+        ],
+        "start_url": "/",
+        "display": "standalone",
+        "shortcuts": [
+            {
+                "name": "Recipes",
+                "url": "/recipes"
+            },
+            {
+                "name": "Add Recipe",
+                "url": "/recipes/new"
+            },
+            {
+                "name": "Shopping List",
+                "url": "/shopping-list"
+            }
+        ]
+    }""", mimetype="application/json")
+
+
+@app.route("/serviceWorker.js")
+def service_worker():
+    return send_file("static/js/serviceWorker.js")
 
 
 @app.errorhandler(HTTPException)
