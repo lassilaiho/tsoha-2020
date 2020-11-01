@@ -2,6 +2,38 @@
 
 {% from "delete-modal.html" import delete_modal %}
 
+{% macro ingredient_row(recipe_ingredient) %}
+<span class="text-break flex-grow-1">
+    {{ recipe_ingredient["amount"] }}
+    {{ recipe_ingredient["name"] }}
+</span>
+<div class="dropdown">
+    <button type="button" class="btn btn-light dropdown-toggle"
+        data-toggle="dropdown">
+        <img src="/static/img/bag.svg" alt="" width="16" height="16"
+            title="Reorder" />
+    </button>
+    <div class="dropdown-menu dropdown-menu-right w-100">
+        {% for amount in recipe_ingredient["shopping_list_amounts"] %}
+        <span class="dropdown-item-text text-break">
+            {{ amount }}
+        </span>
+        {% endfor %}
+        <button type="button" class="dropdown-item"
+            data-ingredient-id="{{ recipe_ingredient['id'] }}"
+            data-amount="{{ recipe_ingredient['amount'] }}"
+            data-amount-unit="{{ recipe_ingredient['amount_unit'] }}"
+            onclick="addToShoppingList(event)">
+            {% if recipe_ingredient["shopping_list_amounts"] %}
+            Click here to add more.
+            {% else %}
+            Not in shopping list. Click here to add.
+            {% endif %}
+        </button>
+    </div>
+</div>
+{% endmacro %}
+
 {% block body %}
 <h1 class="text-break">
     {% if recipe.name %}
@@ -20,45 +52,20 @@
 </p>
 <h2>Ingredients</h2>
 {% if groups %}
-<div>
-    {% for group in groups %}
-    <h5>{{ group["name"] }}</h5>
-    <ol class="list-group">
-        {% for recipe_ingredient in group["ingredients"] %}
-        <li class="list-group-item d-flex justify-content-between">
-            <span class="text-break">
-                {{ recipe_ingredient["amount"] }}
-                {{ recipe_ingredient["name"] }}
-            </span>
-            <div class="dropdown">
-                <button type="button" class="btn btn-light dropdown-toggle"
-                    data-toggle="dropdown">
-                    Amount in shopping list
-                </button>
-                <div class="dropdown-menu w-100">
-                    {% for amount in recipe_ingredient["shopping_list_amounts"] %}
-                    <span class="dropdown-item-text text-break">
-                        {{ amount }}
-                    </span>
-                    {% endfor %}
-                    <button type="button" class="dropdown-item"
-                        data-ingredient-id="{{ recipe_ingredient['id'] }}"
-                        data-amount="{{ recipe_ingredient['amount'] }}"
-                        data-amount-unit="{{ recipe_ingredient['amount_unit'] }}"
-                        onclick="addToShoppingList(event)">
-                        {% if recipe_ingredient["shopping_list_amounts"] %}
-                        Click here to add more.
-                        {% else %}
-                        Not in shopping list. Click here to add.
-                        {% endif %}
-                    </button>
-                </div>
-            </div>
-        </li>
-        {% endfor %}
-    </ol>
+{% for group in groups %}
+{% if group["name"] == "" %}
+{% for recipe_ingredient in group["ingredients"] %}
+<div class="d-flex mb-1">{{ ingredient_row(recipe_ingredient) }}</div>
+{% endfor %}
+{% else %}
+<h5>{{ group["name"] }}</h5>
+<ul>
+    {% for recipe_ingredient in group["ingredients"] %}
+    <li class="d-flex mb-1">{{ ingredient_row(recipe_ingredient) }}</li>
     {% endfor %}
-</div>
+</ul>
+{% endif %}
+{% endfor %}
 {% else %}
 <p>No ingredients</p>
 {% endif %}
@@ -110,6 +117,10 @@
 <style>
     .dropdown-menu button {
         white-space: normal;
+    }
+
+    .ingredient-padding {
+        width: 10%;
     }
 </style>
 {% endblock %}
