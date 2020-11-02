@@ -27,7 +27,7 @@
                 Filters
             </button>
             <div class="dropdown-menu dropdown-menu-right p-2 search-filters"
-                onclick="stopPropagation(event)">
+                onclick="event.stopPropagation()">
                 <div class="d-flex flex-column align-items-start">
                     <div class="form-check">
                         {{ form.no_name(class="form-check-input") }}
@@ -76,7 +76,8 @@
             </p>
             <div class="d-flex justify-content-end mt-auto">
                 <a class="btn btn-primary mr-2"
-                    href="{{ url_for('get_recipe', recipe_id=recipe.id) }}">
+                    href="{{ url_for('get_recipe', recipe_id=recipe.id) }}"
+                    onclick="saveLocation()">
                     Details
                 </a>
                 <button type="button" class="btn btn-danger" data-toggle="modal"
@@ -139,6 +140,8 @@
             modal.find(".modal-body p").text(bodyText);
             modal.find("form").attr("action", button.data("action"));
         });
+
+        sessionStorage.removeItem("searchLocation");
     });
 
     function onSearch() {
@@ -158,8 +161,8 @@
         pageInput.value = event.target.dataset.page;
     }
 
-    function stopPropagation(event) {
-        event.stopPropagation();
+    function saveLocation() {
+        sessionStorage.setItem("searchLocation", document.location.href);
     }
 </script>
 {% endblock %}
