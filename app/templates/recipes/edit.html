@@ -1,7 +1,8 @@
 {% extends "layout.html" %}
 
 {% block body %}
-<form method="POST" action="{{ save_action }}" onsubmit="onSubmit(event)">
+<form method="POST" action="{{ save_action }}"
+    onsubmit="ingredientList.prepareForSubmit()">
     <div class="form-group">
         {{ form.name.label }}
         {{ form.name(id='name', class='form-control') }}
@@ -27,15 +28,14 @@
             {% endif %}
             {% endfor %}
         </div>
-        <div id="common-ingredient-list" class="ml-4"></div>
-        <div id="grouped-ingredient-list"></div>
+        <div id="ingredient-list" class="ml-4"></div>
         <div class="d-flex mb-2 justify-content-end">
             <button type="button" class="btn btn-success mr-2"
-                onclick="addGroup()">
+                onclick="ingredientList.addGroup()">
                 Add group
             </button>
             <button type="button" class="btn btn-success"
-                onclick="addIngredient()">
+                onclick="ingredientList.addIngredient()">
                 Add ingredient
             </button>
         </div>
@@ -58,43 +58,36 @@
     {{ form.csrf_token }}
 </form>
 <template id="group-template">
-    <div>
-        <div class="form-inline pb-2 align-items-start">
-            <img src="/static/img/vertical-dots.svg" alt="" width="32"
-                height="32" title="Reorder" draggable="false" class="handle">
-            <input class="form-control group-input flex-grow-1" type="text"
-                value="" placeholder="Group name" draggable="true"
-                ondragstart="disableDrag(event)" />
-            <button type="button" class="btn btn-danger ml-2" draggable="true"
-                ondragstart="disableDrag(event)" onclick="removeGroup(event)">
-                Remove
-            </button>
+    <div class="form-inline my-2 align-items-start">
+        <img src="/static/img/vertical-dots.svg" alt="" width="32" height="32"
+            title="Reorder" class="handle" draggable="false">
+        <div class="d-flex flex-column flex-grow-1">
+            <input class="form-control group-input" type="text" value=""
+                placeholder="Group name" />
+            <div class="group-error-display text-danger"></div>
         </div>
-        <div class="group-error-display text-danger"></div>
-        <div class="ingredient-list pl-4" draggable="true"
-            ondragstart="disableDrag(event)"></div>
+        <button type="button" class="btn btn-danger ml-2 remove-button">
+            Remove
+        </button>
     </div>
 </template>
 <template id="ingredient-template">
-    <div class="form-inline pb-2 align-items-start">
+    <div class="form-inline pl-4 my-2 align-items-start">
         <img src="/static/img/vertical-dots.svg" alt="" width="32" height="32"
-            title="Reorder" draggable="false" class="handle">
-        <div class="d-flex flex-column" draggable="true"
-            ondragstart="disableDrag(event)">
+            title="Reorder" class="handle" draggable="false">
+        <div class="d-flex flex-column">
             <input class="form-control amount-input" type="text" value=""
                 placeholder="Amount">
             <div class="amount-error-display text-danger"></div>
         </div>
-        <div class="d-flex flex-column flex-grow-1 mx-2" draggable="true"
-            ondragstart="disableDrag(event)">
+        <div class="d-flex flex-column flex-grow-1 mx-2">
             <input class="form-control name-input" required="" type="text"
                 value="" placeholder="Ingredient">
             <div class="name-error-display text-danger"></div>
         </div>
         <datalist></datalist>
         <input class="ingredient-group-input d-none" type="text" value="" />
-        <button type="button" class="btn btn-danger" draggable="true"
-            ondragstart="disableDrag(event)" onclick="removeIngredient(event)">
+        <button type="button" class="btn btn-danger remove-button">
             Remove
         </button>
     </div>
@@ -102,113 +95,28 @@
 <style>
     .handle {
         cursor: grab;
+        touch-action: none;
+        user-select: none;
     }
 </style>
 <script>
-    let ingredientList, commonIngredientList, ingredientTemplate,
-        groupList, groupListElement, groupTemplate,
-        idCounter = 0;
-    const completers = new Map(),
-        initialValues = {{ ingredient_data| tojson }};
+    let ingredientList;
+    const initialValues = {{ ingredient_data| tojson }};
 
     document.addEventListener("DOMContentLoaded", () => {
-        ingredientTemplate = document.getElementById("ingredient-template");
-        groupTemplate = document.getElementById("group-template");
+        Ingredient.init();
+        Group.init();
 
-        groupListElement = document.getElementById("grouped-ingredient-list");
-        commonIngredientList = document.getElementById("common-ingredient-list");
-        groupList = new SortableList("groups", groupListElement);
-        ingredientList = new SortableList("ingredients", commonIngredientList);
+        ingredientList = new IngredientList(document.getElementById("ingredient-list"));
         for (const group of initialValues) {
-            if (group.name === "") {
-                group.ingredients.forEach(x => addIngredient(x, commonIngredientList));
-            } else {
-                addGroup(group);
-                group.ingredients.forEach(x => addIngredient(x));
+            if (group.name !== "") {
+                ingredientList.addGroup(group);
+            }
+            for (const ingredient of group.ingredients) {
+                ingredientList.addIngredient(ingredient);
             }
         }
     });
-
-    function addIngredient(value, parent) {
-        const id = idCounter++;
-        const [row, completer] = createIngredientRow(
-            id,
-            value ?? {
-                amount: "",
-                amountErrors: [],
-                name: "",
-                nameErrors: [],
-            }
-        );
-        if (parent === undefined) {
-            parent = groupListElement.children.length === 0
-                ? commonIngredientList
-                : groupListElement.lastElementChild
-                    .querySelector(".ingredient-list");
-        }
-        parent.append(row);
-        completers.set(id, completer);
-    }
-
-    function removeIngredient(event) {
-        const row = event.target.parentNode;
-        const id = parseInt(row.dataset.id);
-        row.remove();
-        completers.get(id).dispose();
-        completers.delete(id);
-    }
-
-    function createIngredientRow(id, data) {
-        const row = ingredientTemplate.content.cloneNode(true);
-        row.firstElementChild.dataset.id = id;
-        row.firstElementChild.id = `ingredient-${id}`;
-        row.querySelector(".amount-input").value = data.amount;
-        const nameInput = row.querySelector(".name-input");
-        nameInput.value = data.name;
-        const dataList = row.querySelector("datalist");
-        dataList.id = `datalist-${id}`;
-        const completer = new Autocompleter(
-            "{{ url_for('ingredient_completions') }}",
-            nameInput,
-            dataList,
-        );
-        displayErrors(
-            row.querySelector(".amount-error-display"),
-            data.amountErrors,
-        );
-        displayErrors(
-            row.querySelector(".name-error-display"),
-            data.nameErrors,
-        );
-        return [row, completer];
-    }
-
-    function addGroup(value) {
-        const row = createGroupRow(
-            idCounter++,
-            value ?? {
-                name: "",
-                errors: [],
-            },
-        );
-        groupListElement.append(row);
-        ingredientList.observeParent(row.querySelector(".ingredient-list"));
-    }
-
-    function removeGroup(event) {
-        event.target.parentNode.parentNode.remove();
-    }
-
-    function createGroupRow(id, data) {
-        const row = groupTemplate.content.cloneNode(true);
-        row.firstElementChild.id = `group-${id}`;
-        row.querySelector(".group-input").value = data.name;
-        displayErrors(
-            row.querySelector(".group-error-display"),
-            data.errors,
-        );
-        return row.firstElementChild;
-    }
 
     function displayErrors(element, errors) {
         for (let i = 0; i < errors.length; i++) {
@@ -219,103 +127,225 @@
         }
     }
 
-    function onSubmit(event) {
-        let i = 0;
-        const prepareForSubmit = (parent, group) => {
-            const amounts = parent.querySelectorAll(".amount-input");
-            const names = parent.querySelectorAll(".name-input");
-            const groups = parent.querySelectorAll(".ingredient-group-input");
-            for (let j = 0; j < amounts.length; j++, i++) {
-                amounts[j].name = `ingredient_amounts-${i}-amount`;
-                names[j].name = `ingredient_amounts-${i}-name`;
-                groups[j].name = `ingredient_amounts-${i}-group`;
-                groups[j].value = group;
-            }
-        };
-        prepareForSubmit(commonIngredientList, "");
-        for (const group of groupListElement.children) {
-            prepareForSubmit(group, group.querySelector(".group-input").value);
+    class Ingredient {
+        static template;
+
+        static init() {
+            this.template = document.getElementById("ingredient-template");
         }
 
-        const amounts = event.target.querySelectorAll(".amount-input");
-        const names = event.target.querySelectorAll(".name-input");
-        for (let i = 0; i < amounts.length; i++) {
-            amounts[i].name = `ingredient_amounts-${i}-amount`;
-            names[i].name = `ingredient_amounts-${i}-name`;
+        constructor(id, data, onRemove) {
+            this.element = Ingredient.template.content.cloneNode(true).firstElementChild;
+            this.element.querySelector(".amount-input").value = data.amount;
+            const nameInput = this.element.querySelector(".name-input");
+            nameInput.value = data.name;
+            const dataList = this.element.querySelector("datalist");
+            dataList.id = `datalist-${id}`;
+            this.completer = new Autocompleter(
+                "{{ url_for('ingredient_completions') }}",
+                nameInput,
+                dataList,
+            );
+            displayErrors(
+                this.element.querySelector(".amount-error-display"),
+                data.amountErrors,
+            );
+            displayErrors(
+                this.element.querySelector(".name-error-display"),
+                data.nameErrors,
+            );
+            this.element.querySelector(".remove-button").onclick =
+                () => onRemove(this);
+        }
+
+        prepareForSubmit(index, groupName) {
+            this.element.querySelector(".amount-input")
+                .name = `ingredient_amounts-${index}-amount`;
+            this.element.querySelector(".name-input")
+                .name = `ingredient_amounts-${index}-name`;
+            const groupInput =
+                this.element.querySelector(".ingredient-group-input");
+            groupInput.name = `ingredient_amounts-${index}-group`;
+            groupInput.value = groupName;
+        }
+
+        remove() {
+            this.completer.dispose();
+            this.completer = null;
+            this.element.remove();
+            this.element = null;
+        }
+
+        get midY() {
+            const rect = this.element.getBoundingClientRect();
+            return rect.top + rect.height / 2;
         }
     }
 
-    function disableDrag(e) {
-        e.preventDefault();
-        e.stopPropagation();
+    class Group {
+        static template;
+
+        static init() {
+            this.template = document.getElementById("group-template");
+        }
+
+        constructor(data, onRemove) {
+            this.element = Group.template.content.cloneNode(true).firstElementChild;
+            this.input = this.element.querySelector(".group-input");
+            this.input.value = data.name;
+            displayErrors(
+                this.element.querySelector(".group-error-display"),
+                data.errors,
+            );
+            this.element.querySelector(".remove-button").onclick =
+                () => onRemove(this);
+        }
+
+        get name() {
+            return this.input.value;
+        }
+
+        remove() {
+            this.element.remove();
+            this.element = null;
+        }
+
+        get midY() {
+            const rect = this.element.firstElementChild.getBoundingClientRect();
+            return rect.top + rect.height / 2;
+        }
     }
 
-    class SortableList {
-        constructor(listId, ...parents) {
-            this.listId = listId;
-            this.onChange = this.onChange.bind(this);
-            this.observers = [];
-            for (const parent of parents) {
-                parent.childNodes.forEach(this.makeDraggable, this);
-                this.observeParent(parent);
-            }
+    class IngredientList {
+        static idCounter = 0;
+        items = [];
+        currentCopy = null;
+        currentOffset = { x: 0, y: 0 };
+
+        constructor(element) {
+            this.element = element;
+
+            this.addIngredient = this.addIngredient.bind(this);
+            this.addGroup = this.addGroup.bind(this);
+            this.removeItem = this.removeItem.bind(this);
+            this.prepareForSubmit = this.prepareForSubmit.bind(this);
         }
 
-        dispose() {
-            this.observers.forEach(x => x.disconnect());
+        addIngredient(value) {
+            if (this.currentCopy !== null) return;
+            const ingredient = new Ingredient(
+                IngredientList.idCounter++,
+                value ?? {
+                    amount: "",
+                    amountErrors: [],
+                    name: "",
+                    nameErrors: [],
+                },
+                this.removeItem,
+            );
+            this.element.append(ingredient.element);
+            this.items.push(ingredient);
+            this.makeDraggable(ingredient);
         }
 
-        onChange(records) {
-            for (const record of records) {
-                for (const node of record.addedNodes) {
-                    this.makeDraggable(node);
-                }
-            }
+        addGroup(value) {
+            if (this.currentCopy !== null) return;
+            const group = new Group(
+                value ?? {
+                    name: "",
+                    errors: [],
+                },
+                this.removeItem,
+            );
+            this.element.append(group.element);
+            this.items.push(group);
+            this.makeDraggable(group);
         }
 
-        observeParent(parent) {
-            const observer = new MutationObserver(this.onChange);
-            observer.observe(parent, { childList: true });
-            this.observers.push(observer);
+        removeItem(item) {
+            if (this.currentCopy !== null) return;
+            this.items.splice(this.items.indexOf(item), 1)[0].remove();
         }
 
         makeDraggable(item) {
-            item.draggable = true;
-            item.addEventListener("dragstart", event => {
-                event.stopPropagation();
-                event.dataTransfer.effectAllowed = "move";
-                event.dataTransfer.setData(item.id, "");
-                event.dataTransfer.setData(this.listId, "");
-                setTimeout(() => item.style.visibility = "hidden", 0);
-            });
-            item.addEventListener("dragend", event => {
-                item.style.visibility = "unset";
-            });
-            item.addEventListener("dragenter", e => {
-                if (e.dataTransfer.types[1] === this.listId) {
-                    e.preventDefault();
+            interact(item.element.querySelector(".handle")).draggable({
+                onstart: event => {
+                    if (this.currentCopy !== null) {
+                        event.preventDefault();
+                        return;
+                    }
+                    const rect = item.element.getBoundingClientRect();
+
+                    this.currentOffset.x = event.client.x - rect.x;
+                    this.currentOffset.y = event.client.y - rect.y;
+
+                    this.currentCopy = item.element.cloneNode(true);
+                    this.currentCopy.style.position = "fixed";
+                    this.currentCopy.style.width = rect.width + "px";
+                    this.currentCopy.style.height = rect.height + "px";
+                    this.currentCopy.style.left = rect.left + "px";
+                    this.currentCopy.style.top = rect.top + "px";
+                    const datalist = this.currentCopy.querySelector("datalist");
+                    if (datalist) datalist.id = "";
+                    document.body.append(this.currentCopy);
+
+                    item.element.style.visibility = "hidden";
+                },
+                onmove: event => {
+                    this.currentCopy.style.left =
+                        event.client.x - this.currentOffset.x + "px";
+                    this.currentCopy.style.top =
+                        event.client.y - this.currentOffset.y + "px";
+
+                    const nextIndex = this.findNextItemIndex(event.client.y);
+                    const next = this.items[nextIndex];
+                    if (next !== item) {
+                        const index = this.items.indexOf(item);
+                        if (index < nextIndex) {
+                            this.items.splice(nextIndex, 0, item);
+                            this.items.splice(index, 1);
+                        } else {
+                            this.items.splice(index, 1);
+                            this.items.splice(nextIndex, 0, item);
+                        }
+                        this.element.insertBefore(item.element, next?.element ?? null);
+                    }
+                },
+                onend: event => {
+                    this.currentCopy.remove();
+                    this.currentCopy = null;
+                    item.element.style.visibility = "unset";
                 }
-            });
-            item.addEventListener("dragover", event => {
-                if (event.dataTransfer.types[1] !== this.listId) {
-                    return;
+            })
+        }
+
+        findNextItemIndex(y) {
+            let a = 0, b = this.items.length;
+            while (true) {
+                const mid = Math.floor((b - a) / 2);
+                if (mid === 0) break;
+                if (y <= this.items[a + mid].midY) {
+                    b = a + mid;
+                } else {
+                    a += mid;
                 }
-                event.preventDefault();
-                const draggedId = event.dataTransfer.types[0];
-                const rect = item.getBoundingClientRect();
-                if (event.clientY - rect.top < rect.height / 2
-                    && item.previousElementSibling?.id !== draggedId
-                ) {
-                    const draggedItem = document.getElementById(draggedId);
-                    item.parentNode.insertBefore(draggedItem, item);
-                } else if (item.nextElementSibling?.id !== draggedId) {
-                    const draggedItem = document.getElementById(draggedId);
-                    item.parentNode.insertBefore(draggedItem, item.nextElementSibling);
+            }
+            return y > this.items[a].midY ? b : a;
+        }
+
+        prepareForSubmit() {
+            let group = null, i = 0;
+            this.items.forEach(item => {
+                if (item instanceof Ingredient) {
+                    item.prepareForSubmit(i++, group?.name ?? "");
+                } else {
+                    group = item;
                 }
             });
         }
     }
-
+</script>
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js">
 </script>
 <script src="/static/js/autocomplete.js"></script>
 {% endblock %}
