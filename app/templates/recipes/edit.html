@@ -136,7 +136,8 @@
 
         constructor(id, data, onRemove) {
             this.element = Ingredient.template.content.cloneNode(true).firstElementChild;
-            this.element.querySelector(".amount-input").value = data.amount;
+            this.amountInput = this.element.querySelector(".amount-input");
+            this.amountInput.value = data.amount;
             const nameInput = this.element.querySelector(".name-input");
             nameInput.value = data.name;
             const dataList = this.element.querySelector("datalist");
@@ -180,6 +181,10 @@
             const rect = this.element.getBoundingClientRect();
             return rect.top + rect.height / 2;
         }
+
+        focus() {
+            this.amountInput.focus();
+        }
     }
 
     class Group {
@@ -214,6 +219,10 @@
             const rect = this.element.firstElementChild.getBoundingClientRect();
             return rect.top + rect.height / 2;
         }
+
+        focus() {
+            this.input.focus();
+        }
     }
 
     class IngredientList {
@@ -246,6 +255,7 @@
             this.element.append(ingredient.element);
             this.items.push(ingredient);
             this.makeDraggable(ingredient);
+            ingredient.focus();
         }
 
         addGroup(value) {
@@ -260,6 +270,7 @@
             this.element.append(group.element);
             this.items.push(group);
             this.makeDraggable(group);
+            group.focus();
         }
 
         removeItem(item) {
