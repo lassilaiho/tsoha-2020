@@ -42,6 +42,14 @@ def render_edit_form(save_action: str, cancel_action: str, form: EditRecipeForm)
     )
 
 
+def case_insensetive_contains(field, search_string: str):
+    s = search_string.\
+        replace("/", "//").\
+        replace("%", "/%").\
+        replace("_", "/_")
+    return field.ilike(f"%{s}%", escape="/")
+
+
 @app.route("/recipes")
 @login_required
 def get_recipes():
@@ -55,12 +63,20 @@ def get_recipes():
     if form.query.data:
         filter = false()
         if not form.no_name.data:
-            filter |= Recipe.name.contains(form.query.data, autoescape=True)
+            filter |= case_insensetive_contains(
+                Recipe.name,
+                form.query.data,
+            )
         if not form.no_description.data:
-            filter |= Recipe.description.contains(
-                form.query.data, autoescape=True)
+            filter |= case_insensetive_contains(
+                Recipe.description,
+                form.query.data,
+            )
         if not form.no_steps.data:
-            filter |= Recipe.steps.contains(form.query.data, autoescape=True)
+            filter |= case_insensetive_contains(
+                Recipe.steps,
+                form.query.data,
+            )
         filter &= Recipe.account_id == current_user.id
         recipes = Recipe.query.filter(filter).order_by(Recipe.name)
     else:
